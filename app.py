@@ -33,15 +33,6 @@ colors = {
     
 external_stylesheets = ['./static/bWLwgP.css']
 
-# Log = load_triton_log.TritonLogReader(r"//janeway/user ag bluhm/Common/GaAs/Otten/log 190522 110546.vcl")
-
-Log = load_triton_log.TritonLogReader(r"\\OI-PC\\LogFiles\\60555 Bluhm\\log 190609 120150.vcl")
-Log.logger = logger
-df=Log.df
-# Hack for correct timezone
-LOCAL_TIMEZONE_DIFF = datetime.now()-datetime.utcnow()
-print(LOCAL_TIMEZONE_DIFF)
-
 layout = {
                 'plot_bgcolor': colors['background'],
                 'paper_bgcolor': colors['background'],                
@@ -51,7 +42,19 @@ layout = {
                 'height': 800
             }
 
-lakeshore_sensors=['PT1 Head', 
+# Hack for correct timezone
+LOCAL_TIMEZONE_DIFF = datetime.now()-datetime.utcnow()
+print(LOCAL_TIMEZONE_DIFF)
+
+#Setup for Triton Fridge
+# Log = load_triton_log.TritonLogReader(r"//janeway/user ag bluhm/Common/GaAs/Otten/log 190522 110546.vcl")
+Log = load_triton_log.TritonLogReader(r"\\OI-PC\\LogFiles\\60555 Bluhm\\log 190609 120150.vcl")
+Log.logger = logger
+df=Log.df # Still nessesary?
+
+# Standart Temp and Preasure Sensors for a Triton System
+lakeshore_sensors=[
+                'PT1 Head', 
                 'PT1 Plate', 
                 'PT2 Head', 
                 'PT2 Plate', 
@@ -59,86 +62,55 @@ lakeshore_sensors=['PT1 Head',
                 'Still Plate',
                 'Cold Plate', 
                 'MC Plate',
-                'MC Plate Cernox']
+                'MC Plate Cernox'
+                ]
+preasure_sensors=[
+    'P1 Tank (Bar)',
+    'P2 Condense (Bar)',
+    'P3 Still (mBar)',
+    'P4 Turbo Back (mBar)',
+    'P5 ForepumpBack (Bar)',
+    'Dewar (mBar)' #Does it make sense to include the dewar or move it to misc?
+]
+
+misc_sensors=[
+           'Input Water Temp', 
+            'Output Water Temp' ,
+            'Oil Temp', 
+            'Helium Temp', 
+            'Motor Current', 
+            'Low Pressure', 
+            'Low Pressure Avg', 
+            'Still heater (W)', 
+            'chamber heater (W)', 
+            'IVC sorb heater (W)', 
+            'turbo current(A)', 
+            'turbo power(W)', 
+            'turbo speed(Hz)', 
+            'turbo motor(C)', 
+            'turbo bottom(C)'
+            ]
+
+# Create main plot for the dashboard view
 def make_static_figure(df):
-    temp_traces = [go.Scatter(
-                            x=df['PT1 Head t(s)'],
-                            y=df['PT1 Head T(K)'],
-                            legendgroup='group',
-                            name='PT1 Head (mBar)'),
-                    go.Scatter(
-                            x=df['PT1 Plate t(s)'],
-                            y=df['PT1 Plate T(K)'],
-                            legendgroup='group',
-                            name='PT1 Plate (mBar)'),
-                    go.Scatter(
-                            x=df['PT2 Head t(s)'],
-                            y=df['PT2 Head T(K)'],
-                            legendgroup='group',
-                            name='PT2 Head T(K)'),
-                    go.Scatter(
-                            x=df['PT2 Plate t(s)'],
-                            y=df['PT2 Plate T(K)'],
-                            legendgroup='group',
-                            name='PT2 Plate T(K)'),
-                    go.Scatter(
-                            x=df['Magnet t(s)'],
-                            y=df['Magnet T(K)'],
-                             legendgroup='group',
-                            name='Magnet T(K)'),
-                    go.Scatter(
-                            x=df['Still Plate t(s)'],
-                            y=df['Still Plate T(K)'],
-                            legendgroup='group',
-                            name='Still Plate T(K)'),
-                    go.Scatter(
-                            x=df['Cold Plate t(s)'],
-                            y=df['Cold Plate T(K)'],
-                            legendgroup='group',
-                            name='Cold Plate T(K)'),
-                    go.Scatter(
-                            x=df['MC Plate t(s)'],
-                            y=df['MC Plate T(K)'],
-                            legendgroup='group',
-                            name='MC Plate T(K)'),
-                    go.Scatter(
-                            x=df['MC Plate Cernox t(s)'],
-                            y=df['MC Plate Cernox T(K)'],
-                            legendgroup='group',
-                            name='MC Plate Cernox T(K)')
-                    ]
-    
-    preasure_traces = [go.Scatter(
-                            x=df['Time'],
-                            y=df['P1 Tank (Bar)'],
-                            legendgroup='group2',
-                            name='P1 Tank (Bar)'),
-                    go.Scatter(
-                            x=df['Time'],
-                            y=df['P2 Condense (Bar)'],
-                            legendgroup='group2',
-                            name='P2 Condense (Bar)'),
-                    go.Scatter(
-                            x=df['Time'],
-                            y=df['P3 Still (mBar)'],
-                            legendgroup='group2',
-                            name='P3 Still (mBar)'),
-                    go.Scatter(
-                            x=df['Time'],
-                            y=df['P4 TurboBack (mBar)'],
-                            legendgroup='group2',
-                            name='P4 TurboBack (mBar)'),
-                    go.Scatter(
-                            x=df['Time'],
-                            y=df['P5 ForepumpBack (Bar)'],
-                            legendgroup='group2',
-                            name='P5 ForepumpBack (Bar)'),
-                    go.Scatter(
-                            x=df['Time'],
-                            y=df['Dewar (mBar)'],
-                            legendgroup='group2',
-                            name='Dewar (mBar)')
-                    ]
+    temp_traces = [
+        go.Scatter(
+            x=df[f'{trace} t(s)'],
+            y=df[f'{trace} T(K)'],
+            legendgroup='temperature',
+            name=f'{trace} T(K)'
+            ) for trace in lakeshore_sensors
+            ]
+
+    preasure_traces = [
+        go.Scatter(
+            x=df['Time'],
+            y=df[f'{trace}'],
+            legendgroup='preasure',
+            name=f'{trace}'
+            ) for trace in preasure_sensors
+            ]
+
     fig = tools.make_subplots(rows=2, 
                         cols=1, 
                         specs=[[{}], [{}]],
@@ -159,6 +131,7 @@ def make_static_figure(df):
 
     return fig
 
+# Create dash app, expose flask server (change localhost to expose server?)
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 server = app.server
 
@@ -166,7 +139,8 @@ app.title='Fridge Monitor'
 
 logger.debug('Creating Layout')
 
-page_fridge_1 = [html.Div(#Live Dashboard Part
+# Create Page Layout
+dashboard = [html.Div(#Live Dashboard Part
         style={'columnCount': 4,
             'textAlign': 'left',
             'color': colors['text'],
@@ -182,9 +156,13 @@ page_fridge_1 = [html.Div(#Live Dashboard Part
             html.H2('Magnet Temp', id='magnet_temp_disp')
                 ]
             ),
-            # TODO Add option for log scale
-            dcc.Graph(id='static_plot'),
-            html.Label('MISC Channels', 
+            dcc.Interval(
+            id='interval-component',
+            interval=60*1000, # in milliseconds
+            n_intervals=0
+            )]
+
+log_reader = [html.Label('MISC Channels', 
                style={'textAlign': 'center',
                       'color': colors['text']}, ),
             dcc.Interval(
@@ -218,10 +196,15 @@ page_fridge_1 = [html.Div(#Live Dashboard Part
                 },
             id='misc_dropdown'
             ),
-            dcc.Graph(id='misc_plot')
-            ]
-    
-app.layout = html.Div(style={'backgroundColor': colors['background']}, children=[
+            dcc.Graph(id='misc_plot')]
+
+
+page_fridge_1 = dashboard + log_reader
+
+
+app.layout = html.Div( # Main Div
+    style={'backgroundColor': colors['background']}, 
+    children=[ 
     html.H1( #Header
         children='Triton 200', 
         style={
@@ -229,10 +212,12 @@ app.layout = html.Div(style={'backgroundColor': colors['background']}, children=
             'color': colors['text'],
             'padding': 25
         }
-    )]
-    +   page_fridge_1
+    ) 
+    ]
+    +   page_fridge_1 # Page Content
     )
     
+# create callbacks
 logger.debug('Creating callbacks')
 @app.callback(
     Output('static_plot', 'figure'),
