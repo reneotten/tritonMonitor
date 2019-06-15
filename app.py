@@ -44,11 +44,10 @@ layout = {
 
 # Hack for correct timezone
 LOCAL_TIMEZONE_DIFF = datetime.now()-datetime.utcnow()
-print(LOCAL_TIMEZONE_DIFF)
 
 #Setup for Triton Fridge
-# Log = load_triton_log.TritonLogReader(r"//janeway/user ag bluhm/Common/GaAs/Otten/log 190522 110546.vcl")
-Log = load_triton_log.TritonLogReader(r"\\OI-PC\\LogFiles\\60555 Bluhm\\log 190609 120150.vcl")
+Log = load_triton_log.TritonLogReader(r"log 190522 110546.vcl")
+# Log = load_triton_log.TritonLogReader(r"\\OI-PC\\LogFiles\\60555 Bluhm\\log 190609 120150.vcl")
 Log.logger = logger
 df=Log.df # Still nessesary?
 
@@ -68,20 +67,20 @@ preasure_sensors=[
     'P1 Tank (Bar)',
     'P2 Condense (Bar)',
     'P3 Still (mBar)',
-    'P4 Turbo Back (mBar)',
+    'P4 TurboBack (mBar)',
     'P5 ForepumpBack (Bar)',
     'Dewar (mBar)' #Does it make sense to include the dewar or move it to misc?
 ]
 
 misc_sensors=[
-           'Input Water Temp', 
+            'Input Water Temp', 
             'Output Water Temp' ,
             'Oil Temp', 
             'Helium Temp', 
             'Motor Current', 
             'Low Pressure', 
             'Low Pressure Avg', 
-            'Still heater (W)', 
+            'Still heater (W)',
             'chamber heater (W)', 
             'IVC sorb heater (W)', 
             'turbo current(A)', 
@@ -111,7 +110,8 @@ def make_static_figure(df):
             ) for trace in preasure_sensors
             ]
 
-    fig = tools.make_subplots(rows=2, 
+    fig = tools.make_subplots(
+                        rows=2, 
                         cols=1, 
                         specs=[[{}], [{}]],
                         shared_xaxes=True, 
@@ -122,10 +122,10 @@ def make_static_figure(df):
                         )
 
     fig.add_traces(
-                    temp_traces + preasure_traces,
-                    [1]*len(temp_traces)+[2]*len(preasure_traces),
-                    [1]*len(temp_traces)+[1]*len(preasure_traces)
-                   )
+            temp_traces + preasure_traces,
+            [1]*len(temp_traces)+[2]*len(preasure_traces),
+            [1]*len(temp_traces)+[1]*len(preasure_traces)
+            )
 
     fig['layout'].update(**layout)
 
@@ -160,33 +160,16 @@ dashboard = [html.Div(#Live Dashboard Part
             id='interval-component',
             interval=60*1000, # in milliseconds
             n_intervals=0
-            )]
+            ),
+            dcc.Graph(id='static_plot')]
 
+# Does it make sense to create 3 subplots for logviewer?
 log_reader = [html.Label('MISC Channels', 
                style={'textAlign': 'center',
                       'color': colors['text']}, ),
-            dcc.Interval(
-            id='interval-component',
-            interval=60*1000, # in milliseconds
-            n_intervals=0
-            ),
             dcc.Dropdown( #Log Reader Part
         options=[
-            {'label': 'Input Water Temp', 'value': 'Input Water Temp'},
-            {'label': 'Output Water Temp', 'value': 'Output Water Temp'},
-            {'label': 'Oil Temp', 'value': 'Oil Temp'},
-            {'label': 'Helium Temp', 'value': 'Helium Temp'},
-            {'label': 'Motor Current', 'value': 'Motor Current'},
-            {'label': 'Low Pressure', 'value': 'Low Pressure'},
-            {'label': 'Low Pressure Avg', 'value': 'Low Pressure Avg'},
-            {'label': 'Still heater (W)', 'value': 'Still heater (W)'},
-            {'label': 'chamber heater (W)', 'value': 'chamber heater (W)'},
-            {'label': 'IVC sorb heater (W)', 'value': 'IVC sorb heater (W)'},
-            {'label': 'turbo current(A)', 'value': 'turbo current(A)'},
-            {'label': 'turbo power(W)', 'value': 'turbo power(W)'},
-            {'label': 'turbo speed(Hz)', 'value': 'turbo speed(Hz)'},
-            {'label': 'turbo motor(C)', 'value': 'turbo motor(C)'},
-            {'label': 'turbo bottom(C)', 'value': 'turbo bottom(C)'}
+            {'label': f'{trace}', 'value': f'{trace}'} for trace in misc_sensors           
             ],
             value=['turbo power(W)'],
             multi=True,
@@ -260,13 +243,13 @@ def update_magnet_temp_disp(n_intervals):
     Output('misc_plot', 'figure'),
     [Input('misc_dropdown', 'value')])
 def update_misc_figure(plot_traces):    
-    traces = []
-    for plot_trace in plot_traces:
-        traces.append(go.Scatter(
+    traces = [
+        go.Scatter(
             x=Log.df['Time'],
             y=Log.df[plot_trace],
             name=plot_trace
-        ))
+        ) for plot_trace in plot_traces
+    ]
     return {
         'data': traces,
         'layout': layout        
