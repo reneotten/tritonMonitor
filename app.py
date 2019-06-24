@@ -11,12 +11,12 @@ import pandas as pd
 import re
 import logging
 import load_triton_log
-from datetime import datetime
+from datetime import datetime, timedelta
 from pytz import timezone
 
 
-#TODO Add Pause button for Log viewing -> Make Log viewer seperate
-#TODO Optimize Colors
+# TODO Add Pause button for Log viewing -> Make Log viewer seperate
+# TODO Optimize Colors
 logger = logging.getLogger('tritonMonitor.app')
 logger.setLevel(logging.DEBUG)
 handler = logging.StreamHandler()
@@ -45,13 +45,13 @@ layout = {
 # Hack for correct timezone
 LOCAL_TIMEZONE_DIFF = datetime.now()-datetime.utcnow()
 
-#Setup for Triton Fridge
-Log = load_triton_log.TritonLogReader(r"log 190522 110546.vcl")
-# Log = load_triton_log.TritonLogReader(r"\\OI-PC\\LogFiles\\60555 Bluhm\\log 190609 120150.vcl")
+# Setup for Triton Fridge
+# Log = load_triton_log.TritonLogReader(r"log 190522 110546.vcl")
+Log = load_triton_log.TritonLogReader(r"\\134.61.7.160\LogFiles\60555 Bluhm\log 190609 120150.vcl")
 Log.logger = logger
 df=Log.df # Still nessesary?
 
-# Standart Temp and Preasure Sensors for a Triton System
+# Standart Temp and pressure Sensors for a Triton System
 lakeshore_sensors=[
                 'PT1 Head', 
                 'PT1 Plate', 
@@ -63,7 +63,7 @@ lakeshore_sensors=[
                 'MC Plate',
                 'MC Plate Cernox'
                 ]
-preasure_sensors=[
+pressure_sensors=[
     'P1 Tank (Bar)',
     'P2 Condense (Bar)',
     'P3 Still (mBar)',
@@ -90,24 +90,28 @@ misc_sensors=[
             'turbo bottom(C)'
             ]
 
+
 # Create main plot for the dashboard view
-def make_static_figure(df):
+def make_static_figure(df, duration=2):
+    start_time = df['Time'].iloc[-1] - timedelta(days=duration)
+    print(start_time)
+    #print([df.loc[df['Time']>start_time,f'{trace} t(s)'] for trace in lakeshore_sensors])
     temp_traces = [
         go.Scatter(
-            x=df[f'{trace} t(s)'],
-            y=df[f'{trace} T(K)'],
+            x=df.loc[df[f'{trace} t(s)']>start_time,f'{trace} t(s)'],
+            y=df.loc[df[f'{trace} t(s)']>start_time,f'{trace} T(K)'],
             legendgroup='temperature',
             name=f'{trace} T(K)'
             ) for trace in lakeshore_sensors
             ]
 
-    preasure_traces = [
+    pressure_traces = [
         go.Scatter(
-            x=df['Time'],
-            y=df[f'{trace}'],
-            legendgroup='preasure',
+            x=df.loc[df['Time']>start_time,'Time'],
+            y=df.loc[df['Time']>start_time,f'{trace}'],
+            legendgroup='pressure',
             name=f'{trace}'
-            ) for trace in preasure_sensors
+            ) for trace in pressure_sensors
             ]
 
     fig = tools.make_subplots(
@@ -117,34 +121,37 @@ def make_static_figure(df):
                         shared_xaxes=True, 
                         shared_yaxes=False,
                         vertical_spacing=0.07,
-                        subplot_titles=('Temperature Sensors', 'Preasure Sensors'),
+                        subplot_titles=('Temperature Sensors', 'pressure Sensors'),
                         print_grid=False
                         )
 
     fig.add_traces(
-            temp_traces + preasure_traces,
-            [1]*len(temp_traces)+[2]*len(preasure_traces),
-            [1]*len(temp_traces)+[1]*len(preasure_traces)
+            temp_traces + pressure_traces,
+            [1]*len(temp_traces)+[2]*len(pressure_traces),
+            [1]*len(temp_traces)+[1]*len(pressure_traces)
             )
 
     fig['layout'].update(**layout)
 
     return fig
 
+
 # Create dash app, expose flask server (change localhost to expose server?)
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 server = app.server
 
-app.title='Fridge Monitor'
+app.title = 'Fridge Monitor'
 
 logger.debug('Creating Layout')
 
 # Create Page Layout
-dashboard = [html.Div(#Live Dashboard Part
-        style={'columnCount': 4,
-            'textAlign': 'left',
-            'color': colors['text'],
-            'padding': 20}, 
+dashboard = [html.Div(  # Live Dashboard Part
+        style={
+                'columnCount': 4,
+                'textAlign': 'left',
+                'color': colors['text'],
+                'padding': 20
+                },
         children=[
             html.H4('Last Log Read'),
             html.H2('Last Log Read', id='update_time'),
@@ -167,8 +174,8 @@ dashboard = [html.Div(#Live Dashboard Part
 log_reader = [html.Label('MISC Channels', 
                style={'textAlign': 'center',
                       'color': colors['text']}, ),
-            dcc.Dropdown( #Log Reader Part
-        options=[
+            dcc.Dropdown(  # Log Reader Part
+            options=[
             {'label': f'{trace}', 'value': f'{trace}'} for trace in misc_sensors           
             ],
             value=['turbo power(W)'],
