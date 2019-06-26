@@ -39,6 +39,7 @@ layout = {
                 'font': {
                     'color': colors['text']
                 },
+                'uirevision': None,
                 'height': 800
             }
 
@@ -92,16 +93,23 @@ misc_sensors=[
 
 
 # Create main plot for the dashboard view
-def make_static_figure(df, duration=2):
+def m_str(val, unit='K'):
+    if val < 1:
+        unit = 'm' + unit
+        val *= 1e3
+    return f"{val:.1f} {unit}"
+
+def make_static_traces(df, duration=3):
+    
     start_time = df['Time'].iloc[-1] - timedelta(days=duration)
-    print(start_time)
-    #print([df.loc[df['Time']>start_time,f'{trace} t(s)'] for trace in lakeshore_sensors])
+   
     temp_traces = [
         go.Scatter(
             x=df.loc[df[f'{trace} t(s)']>start_time,f'{trace} t(s)'],
             y=df.loc[df[f'{trace} t(s)']>start_time,f'{trace} T(K)'],
             legendgroup='temperature',
-            name=f'{trace} T(K)'
+            name=f'{trace} T(K)',
+            yaxis='y'
             ) for trace in lakeshore_sensors
             ]
 
@@ -110,9 +118,16 @@ def make_static_figure(df, duration=2):
             x=df.loc[df['Time']>start_time,'Time'],
             y=df.loc[df['Time']>start_time,f'{trace}'],
             legendgroup='pressure',
-            name=f'{trace}'
+            name=f'{trace}',
+            yaxis='y2'
             ) for trace in pressure_sensors
             ]
+    
+    return {'data': temp_traces + pressure_traces}
+    
+def make_static_figure(df, duration=3):
+  
+    traces = make_static_traces(df, duration=3)
 
     fig = tools.make_subplots(
                         rows=2, 
@@ -125,11 +140,7 @@ def make_static_figure(df, duration=2):
                         print_grid=False
                         )
 
-    fig.add_traces(
-            temp_traces + pressure_traces,
-            [1]*len(temp_traces)+[2]*len(pressure_traces),
-            [1]*len(temp_traces)+[1]*len(pressure_traces)
-            )
+    fig.add_traces(traces['data'])
 
     fig['layout'].update(**layout)
 
@@ -153,7 +164,7 @@ dashboard = [html.Div(  # Live Dashboard Part
                 'padding': 20
                 },
         children=[
-            html.H4('Last Log Read'),
+            html.H4('Last Log Read', id='log header'),
             html.H2('Last Log Read', id='update_time'),
             html.H4('MC Temperature'),
             html.H2('MC Temp', id='mc_temp_disp'),
@@ -211,11 +222,12 @@ app.layout = html.Div( # Main Div
 logger.debug('Creating callbacks')
 @app.callback(
     Output('static_plot', 'figure'),
-    [Input('interval-component', 'n_intervals')])
-def update_static_figure(n_intervals):  
+    [Input('interval-component', 'n_intervals'),Input('interval-component', 'interval')])
+def update_static_figure(n_intervals, interval):
     logger.debug(f"{datetime.now().strftime('%H:%M:%S - %d.%m.%Y')}:Refreshing log")
     Log.refresh()
     fig = make_static_figure(Log.df)
+    fig.layout.uirevision = interval
     return fig
 
 @app.callback(
@@ -230,21 +242,21 @@ def update_time_disp(n_intervals):
     [Input('interval-component', 'n_intervals')])
 def update_mc_temp_disp(n_intervals):  
     logger.debug('Refreshing update MC Temp disp')
-    return f"{df['MC Plate T(K)'].iloc[-1]*1000:.4} mK"
+    return m_str(df['MC Plate T(K)'].iloc[-1])
 
 @app.callback(
     Output('P2_disp', 'children'),
     [Input('interval-component', 'n_intervals')])
 def update_P2_disp(n_intervals):  
     logger.debug('Refreshing P2 disp')
-    return f"{df['P2 Condense (Bar)'].iloc[-1]*1000:.4} mbar"
+    return m_str(df['P2 Condense (Bar)'].iloc[-1], unit='bar') 
 
 @app.callback(
     Output('magnet_temp_disp', 'children'),
     [Input('interval-component', 'n_intervals')])
 def update_magnet_temp_disp(n_intervals):  
     logger.debug('Refreshing Magnet Temp disp')
-    return f"{df['Magnet T(K)'].iloc[-1]:.4} K"
+    return m_str(df['Magnet T(K)'].iloc[-1])
 
 @app.callback(
     Output('misc_plot', 'figure'),
