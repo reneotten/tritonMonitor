@@ -17,6 +17,7 @@ from pytz import timezone
 
 # TODO Add Pause button for Log viewing -> Make Log viewer seperate
 # TODO Optimize Colors
+# TODO Catch if sensor on top is disabled
 logger = logging.getLogger('tritonMonitor.app')
 logger.setLevel(logging.DEBUG)
 handler = logging.StreamHandler()
@@ -64,14 +65,15 @@ lakeshore_sensors=[
                 'MC Plate',
                 'MC Plate Cernox'
                 ]
+
 pressure_sensors=[
-    'P1 Tank (Bar)',
-    'P2 Condense (Bar)',
-    'P3 Still (mBar)',
-    'P4 TurboBack (mBar)',
-    'P5 ForepumpBack (Bar)',
-    'Dewar (mBar)' #Does it make sense to include the dewar or move it to misc?
-]
+                'P1 Tank (Bar)',
+                'P2 Condense (Bar)',
+                'P3 Still (mBar)',
+                'P4 TurboBack (mBar)',
+                'P5 ForepumpBack (Bar)',
+                'Dewar (mBar)' #Does it make sense to include the dewar or move it to misc?
+                ]
 
 misc_sensors=[
             'Input Water Temp', 
@@ -99,14 +101,17 @@ def m_str(val, unit='K'):
         val *= 1e3
     return f"{val:.1f} {unit}"
 
-def make_static_traces(df, duration=3):
+def make_static_traces(df, duration=None):
     
-    start_time = df['Time'].iloc[-1] - timedelta(days=duration)
+    if duration is not None:
+        start_time = df['Time'].iloc[-1] - timedelta(days=duration)
+    else:
+        start_time = df['Time'].iloc[-1]
    
     temp_traces = [
         go.Scatter(
-            x=df.loc[df[f'{trace} t(s)']>start_time,f'{trace} t(s)'],
-            y=df.loc[df[f'{trace} t(s)']>start_time,f'{trace} T(K)'],
+            x=df.loc[df[f'{trace} t(s)']>=start_time,f'{trace} t(s)'],
+            y=df.loc[df[f'{trace} t(s)']>=start_time,f'{trace} T(K)'],
             legendgroup='temperature',
             name=f'{trace} T(K)',
             yaxis='y'
@@ -115,8 +120,8 @@ def make_static_traces(df, duration=3):
 
     pressure_traces = [
         go.Scatter(
-            x=df.loc[df['Time']>start_time,'Time'],
-            y=df.loc[df['Time']>start_time,f'{trace}'],
+            x=df.loc[df['Time']>=start_time,'Time'],
+            y=df.loc[df['Time']>=start_time,f'{trace}'],
             legendgroup='pressure',
             name=f'{trace}',
             yaxis='y2'
@@ -125,7 +130,7 @@ def make_static_traces(df, duration=3):
     
     return {'data': temp_traces + pressure_traces}
     
-def make_static_figure(df, duration=3):
+def make_static_figure(df, duration=None, lightweight_mode=True):
   
     traces = make_static_traces(df, duration=3)
 
@@ -136,7 +141,7 @@ def make_static_figure(df, duration=3):
                         shared_xaxes=True, 
                         shared_yaxes=False,
                         vertical_spacing=0.07,
-                        subplot_titles=('Temperature Sensors', 'pressure Sensors'),
+                        subplot_titles=('Temperature Sensors', 'Pressure Sensors'),
                         print_grid=False
                         )
 
@@ -148,7 +153,7 @@ def make_static_figure(df, duration=3):
 
 
 # Create dash app, expose flask server (change localhost to expose server?)
-app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
+app = dash.Dash(__name__, external_stylesheets=external_stylesheets,show_undo_redo=False)
 server = app.server
 
 app.title = 'Fridge Monitor'
@@ -222,12 +227,12 @@ app.layout = html.Div( # Main Div
 logger.debug('Creating callbacks')
 @app.callback(
     Output('static_plot', 'figure'),
-    [Input('interval-component', 'n_intervals'),Input('interval-component', 'interval')])
-def update_static_figure(n_intervals, interval):
+    [Input('interval-component', 'n_intervals')])
+def update_static_figure(n_intervals):
     logger.debug(f"{datetime.now().strftime('%H:%M:%S - %d.%m.%Y')}:Refreshing log")
     Log.refresh()
     fig = make_static_figure(Log.df)
-    fig.layout.uirevision = interval
+    fig.layout.uirevision = True
     return fig
 
 @app.callback(
