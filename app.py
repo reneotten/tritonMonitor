@@ -13,6 +13,7 @@ import logging
 import load_triton_log
 from datetime import datetime, timedelta
 from pytz import timezone
+import json
 
 
 # TODO Add Pause button for Log viewing -> Make Log viewer seperate
@@ -26,24 +27,6 @@ formatter = logging.Formatter("%(levelname)s - %(message)s")
 handler.setFormatter(formatter)
 logger.addHandler(handler)
 
-
-colors = {
-    'background': '#333333',
-    'text': '#7FDBFF'
-}
-    
-external_stylesheets = ['./static/bWLwgP.css']
-
-layout = {
-                'plot_bgcolor': colors['background'],
-                'paper_bgcolor': colors['background'],                
-                'font': {
-                    'color': colors['text']
-                },
-                'uirevision': None,
-                'height': 800
-            }
-
 # Hack for correct timezone
 LOCAL_TIMEZONE_DIFF = datetime.now()-datetime.utcnow()
 
@@ -53,46 +36,8 @@ Log = load_triton_log.TritonLogReader(r"\\134.61.7.160\LogFiles\60555 Bluhm\log 
 Log.logger = logger
 df=Log.df # Still nessesary?
 
-# Standart Temp and pressure Sensors for a Triton System
-lakeshore_sensors=[
-                'PT1 Head', 
-                'PT1 Plate', 
-                'PT2 Head', 
-                'PT2 Plate', 
-                'Magnet', 
-                'Still Plate',
-                'Cold Plate', 
-                'MC Plate',
-                'MC Plate Cernox'
-                ]
-
-pressure_sensors=[
-                'P1 Tank (Bar)',
-                'P2 Condense (Bar)',
-                'P3 Still (mBar)',
-                'P4 TurboBack (mBar)',
-                'P5 ForepumpBack (Bar)',
-                'Dewar (mBar)' #Does it make sense to include the dewar or move it to misc?
-                ]
-
-misc_sensors=[
-            'Input Water Temp', 
-            'Output Water Temp' ,
-            'Oil Temp', 
-            'Helium Temp', 
-            'Motor Current', 
-            'Low Pressure', 
-            'Low Pressure Avg', 
-            'Still heater (W)',
-            'chamber heater (W)', 
-            'IVC sorb heater (W)', 
-            'turbo current(A)', 
-            'turbo power(W)', 
-            'turbo speed(Hz)', 
-            'turbo motor(C)', 
-            'turbo bottom(C)'
-            ]
-
+with open('settings.json','r') as file:
+    settings=json.load(file)
 
 # Create main plot for the dashboard view
 def m_str(val, unit='K'):
@@ -115,7 +60,7 @@ def make_static_traces(df, duration=None):
             legendgroup='temperature',
             name=f'{trace} T(K)',
             yaxis='y'
-            ) for trace in lakeshore_sensors
+            ) for trace in settings['lakeshore_sensors']
             ]
 
     pressure_traces = [
@@ -125,7 +70,7 @@ def make_static_traces(df, duration=None):
             legendgroup='pressure',
             name=f'{trace}',
             yaxis='y2'
-            ) for trace in pressure_sensors
+            ) for trace in settings['pressure_sensors']
             ]
     
     return {'data': temp_traces + pressure_traces}
@@ -147,13 +92,13 @@ def make_static_figure(df, duration=None, lightweight_mode=True):
 
     fig.add_traces(traces['data'])
 
-    fig['layout'].update(**layout)
+    fig['layout'].update(**settings['layout'])
 
     return fig
 
 
 # Create dash app, expose flask server (change localhost to expose server?)
-app = dash.Dash(__name__, external_stylesheets=external_stylesheets,show_undo_redo=False)
+app = dash.Dash(__name__, external_stylesheets=settings['external_stylesheets'],show_undo_redo=False)
 server = app.server
 
 app.title = 'Fridge Monitor'
@@ -165,7 +110,7 @@ dashboard = [html.Div(  # Live Dashboard Part
         style={
                 'columnCount': 4,
                 'textAlign': 'left',
-                'color': colors['text'],
+                'color': settings['colors']['text'],
                 'padding': 20
                 },
         children=[
@@ -189,16 +134,16 @@ dashboard = [html.Div(  # Live Dashboard Part
 # Does it make sense to create 3 subplots for logviewer?
 log_reader = [html.Label('MISC Channels', 
                style={'textAlign': 'center',
-                      'color': colors['text']}, ),
+                      'color': settings['colors']['text']}, ),
             dcc.Dropdown(  # Log Reader Part
             options=[
-            {'label': f'{trace}', 'value': f'{trace}'} for trace in misc_sensors           
+            {'label': f'{trace}', 'value': f'{trace}'} for trace in settings['misc_sensors']           
             ],
             value=['turbo power(W)'],
             multi=True,
             style={
-                'background': colors['background'],  
-                'color': colors['text']
+                'background': settings['colors']['background'],  
+                'color': settings['colors']['text']
                 },
             id='misc_dropdown'
             ),
@@ -209,13 +154,13 @@ page_fridge_1 = dashboard + log_reader
 
 
 app.layout = html.Div( # Main Div
-    style={'backgroundColor': colors['background']}, 
+    style={'backgroundColor': settings['colors']['background']}, 
     children=[ 
     html.H1( #Header
         children='Triton 200', 
         style={
             'textAlign': 'center',
-            'color': colors['text'],
+            'color': settings['colors']['text'],
             'padding': 25
         }
     ) 
@@ -276,7 +221,7 @@ def update_misc_figure(plot_traces):
     ]
     return {
         'data': traces,
-        'layout': layout        
+        'layout': settings['layout']        
     }
 
 if __name__ == '__main__':
