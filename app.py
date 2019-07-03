@@ -16,9 +16,8 @@ from pytz import timezone
 import json
 
 
-# TODO Add Pause button for Log viewing -> Make Log viewer seperate
 # TODO Optimize Colors
-# TODO Catch if sensor on top is disabled
+# TODO Catch if sensor on top is disabled, switch between 2 MC Sensors?
 logger = logging.getLogger('tritonMonitor.app')
 logger.setLevel(logging.DEBUG)
 handler = logging.StreamHandler()
@@ -30,14 +29,11 @@ logger.addHandler(handler)
 # Hack for correct timezone
 LOCAL_TIMEZONE_DIFF = datetime.now()-datetime.utcnow()
 
-# Setup for Triton Fridge
-# Log = load_triton_log.TritonLogReader(r"log 190522 110546.vcl")
-Log = load_triton_log.TritonLogReader(r"\\134.61.7.160\LogFiles\60555 Bluhm\log 190609 120150.vcl")
-Log.logger = logger
-df=Log.df # Still nessesary?
-
-with open('settings.json','r') as file:
+with open('triton200.json','r') as file:
     settings=json.load(file)
+
+Log = load_triton_log.TritonLogReader(settings['log_file'])
+Log.logger = logger
 
 # Create main plot for the dashboard view
 def m_str(val, unit='K'):
@@ -192,26 +188,26 @@ def update_time_disp(n_intervals):
     [Input('interval-component', 'n_intervals')])
 def update_mc_temp_disp(n_intervals):  
     logger.debug('Refreshing update MC Temp disp')
-    return m_str(df['MC Plate T(K)'].iloc[-1])
+    return m_str(Log.df['MC Plate T(K)'].iloc[-1])
 
 @app.callback(
     Output('P2_disp', 'children'),
     [Input('interval-component', 'n_intervals')])
 def update_P2_disp(n_intervals):  
     logger.debug('Refreshing P2 disp')
-    return m_str(df['P2 Condense (Bar)'].iloc[-1], unit='bar') 
+    return m_str(Log.df['P2 Condense (Bar)'].iloc[-1], unit='bar') 
 
 @app.callback(
     Output('magnet_temp_disp', 'children'),
     [Input('interval-component', 'n_intervals')])
 def update_magnet_temp_disp(n_intervals):  
     logger.debug('Refreshing Magnet Temp disp')
-    return m_str(df['Magnet T(K)'].iloc[-1])
+    return m_str(Log.df['Magnet T(K)'].iloc[-1])
 
 @app.callback(
     Output('misc_plot', 'figure'),
     [Input('misc_dropdown', 'value')])
-def update_misc_figure(plot_traces):    
+def update_misc_figure(plot_traces):   
     traces = [
         go.Scatter(
             x=Log.df['Time'],
