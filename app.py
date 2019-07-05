@@ -26,9 +26,6 @@ formatter = logging.Formatter("%(levelname)s - %(message)s")
 handler.setFormatter(formatter)
 logger.addHandler(handler)
 
-# Hack for correct timezone
-LOCAL_TIMEZONE_DIFF = datetime.now()-datetime.utcnow()
-
 with open('triton200.json','r') as file:
     settings=json.load(file)
 

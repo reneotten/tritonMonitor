@@ -2,7 +2,7 @@ import json
 
 settings=dict()
 
-settings['log_file'] = r"\\134.61.7.160\LogFiles\60555 Bluhm\log 190609 120150.vcl"
+settings['log_file'] = r"\\134.61.7.160\LogFiles\60555 Bluhm\log 190703 170733.vcl"
 
 settings['colors'] = {
     'background': '#333333',
