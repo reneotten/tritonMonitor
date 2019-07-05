@@ -79,6 +79,8 @@ def cleanup_log(df, drop_columns, time_columns):
     
     for column in time_columns:
         df[column] = pd.to_datetime(df[column], unit='s')+LOCAL_TIMEZONE_DIFF
+        val_columns = [re.split('t\(s\)$',column)[0] + 'T(K)', re.split('t\(s\)$',column)[0] + 'R(Ohm)']
+        df.loc[df[column]<='1971-01-01 00:00:00',val_columns]=None
         df.loc[df[column]<='1971-01-01 00:00:00',column]=df.loc[0,'Time']
         
     df = df.drop(columns=drop_columns)
