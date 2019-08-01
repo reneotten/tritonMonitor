@@ -3,6 +3,7 @@
         "background": "#333333",
         "text": "#7FDBFF"
     },
+    "duration": 3,
     "external_stylesheets": [
         "./static/bWLwgP.css"
     ],

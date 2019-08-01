@@ -25,8 +25,9 @@ handler.setLevel(logging.DEBUG)
 formatter = logging.Formatter("%(levelname)s - %(message)s")
 handler.setFormatter(formatter)
 logger.addHandler(handler)
+config_file='triton200.json'
 
-with open('triton200.json','r') as file:
+with open(config_file,'r') as file:
     settings=json.load(file)
 
 Log = load_triton_log.TritonLogReader(settings['log_file'])
@@ -70,7 +71,7 @@ def make_static_traces(df, duration=None):
     
 def make_static_figure(df, duration=None, lightweight_mode=True):
   
-    traces = make_static_traces(df, duration=3)
+    traces = make_static_traces(df, duration=duration)
 
     fig = tools.make_subplots(
                         rows=2, 
@@ -169,7 +170,11 @@ logger.debug('Creating callbacks')
 def update_static_figure(n_intervals):
     logger.debug(f"{datetime.now().strftime('%H:%M:%S - %d.%m.%Y')}:Refreshing log")
     Log.refresh()
-    fig = make_static_figure(Log.df)
+
+    with open(config_file,'r') as file:
+        settings=json.load(file)
+
+    fig = make_static_figure(Log.df,duration=settings['duration'])
     fig.layout.uirevision = True
     return fig
 

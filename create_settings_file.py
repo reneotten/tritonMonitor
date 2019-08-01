@@ -8,6 +8,8 @@ settings['colors'] = {
     'background': '#333333',
     'text': '#7FDBFF'
 }
+
+settings['duration'] = 7
     
 settings['external_stylesheets'] = ['./static/bWLwgP.css']
 
