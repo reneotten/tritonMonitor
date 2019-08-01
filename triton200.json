@@ -1,4 +1,7 @@
 {
+    "MC_Cernox": "MC Plate Cernox T(K)",
+    "MC_RuOx": "MC Plate T(K)",
+    "Magnet": "Magnet T(K)",
     "colors": {
         "background": "#333333",
         "text": "#7FDBFF"
@@ -7,6 +10,7 @@
     "external_stylesheets": [
         "./static/bWLwgP.css"
     ],
+    "gridcolor": "#555555",
     "lakeshore_sensors": [
         "PT1 Head",
         "PT1 Plate",
@@ -25,35 +29,7 @@
         "height": 800,
         "paper_bgcolor": "#333333",
         "plot_bgcolor": "#333333",
-        "uirevision": null,
-        "xaxis1": {
-            "anchor": "y1",
-            "gridcolor": "#444444",
-            "side": "bottom",
-            "type": "linear",
-            "zerolinecolor": "#555555"
-        },
-        "xaxis2": {
-            "anchor": "y2",
-            "gridcolor": "#444444",
-            "side": "bottom",
-            "type": "linear",
-            "zerolinecolor": "#555555"
-        },
-        "yaxis1": {
-            "anchor": "x1",
-            "gridcolor": "#444444",
-            "side": "left",
-            "type": "linear",
-            "zerolinecolor": "#555555"
-        },
-        "yaxis2": {
-            "anchor": "x2",
-            "gridcolor": "#444444",
-            "side": "left",
-            "type": "linear",
-            "zerolinecolor": "#555555"
-        }
+        "uirevision": null
     },
     "log_file": "\\\\134.61.7.160\\LogFiles\\60555 Bluhm\\log 190703 170733.vcl",
     "misc_sensors": [
@@ -80,5 +56,6 @@
         "P4 TurboBack (mBar)",
         "P5 ForepumpBack (Bar)",
         "Dewar (mBar)"
-    ]
+    ],
+    "zerolinecolor": "#666666"
 }

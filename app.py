@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+
 import dash
 import dash_core_components as dcc
 import dash_html_components as html
@@ -53,7 +54,7 @@ def make_static_traces(df, duration=None):
             y=df.loc[df[f'{trace} t(s)']>=start_time,f'{trace} T(K)'],
             legendgroup='temperature',
             name=f'{trace} T(K)',
-            yaxis='y'
+            yaxis='y1'
             ) for trace in settings['lakeshore_sensors']
             ]
 
@@ -67,7 +68,7 @@ def make_static_traces(df, duration=None):
             ) for trace in settings['pressure_sensors']
             ]
     
-    return {'data': temp_traces + pressure_traces}
+    return temp_traces + pressure_traces
     
 def make_static_figure(df, duration=None, lightweight_mode=True):
   
@@ -84,9 +85,13 @@ def make_static_figure(df, duration=None, lightweight_mode=True):
                         print_grid=False
                         )
 
-    fig.add_traces(traces['data'])
+    fig.add_traces(traces)
 
     fig['layout'].update(**settings['layout'])
+    for row in range(1,3):
+        fig.update_xaxes(gridcolor=settings['gridcolor'], zerolinecolor=settings['zerolinecolor'], row=row, col=1)
+        fig.update_yaxes(gridcolor=settings['gridcolor'], zerolinecolor=settings['zerolinecolor'], row=row, col=1)
+
 
     return fig
 
@@ -190,7 +195,17 @@ def update_time_disp(n_intervals):
     [Input('interval-component', 'n_intervals')])
 def update_mc_temp_disp(n_intervals):  
     logger.debug('Refreshing update MC Temp disp')
-    return m_str(Log.df['MC Plate T(K)'].iloc[-1])
+    val_RuOx = Log.df[settings['MC_RuOx']].iloc[-1]
+    val_Cernox = Log.df[settings['MC_Cernox']].iloc[-1]
+
+    if val_Cernox is None:
+        val_ret = val_RuOx
+    elif val_RuOx >= 100:
+        val_ret = val_Cernox
+    else:
+        val_ret = val_RuOx
+
+    return m_str(val_ret)
 
 @app.callback(
     Output('P2_disp', 'children'),
@@ -204,7 +219,7 @@ def update_P2_disp(n_intervals):
     [Input('interval-component', 'n_intervals')])
 def update_magnet_temp_disp(n_intervals):  
     logger.debug('Refreshing Magnet Temp disp')
-    return m_str(Log.df['Magnet T(K)'].iloc[-1])
+    return m_str(Log.df[settings['Magnet']].iloc[-1])
 
 @app.callback(
     Output('misc_plot', 'figure'),

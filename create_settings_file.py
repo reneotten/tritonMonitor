@@ -9,7 +9,11 @@ settings['colors'] = {
     'text': '#7FDBFF'
 }
 
-settings['duration'] = 7
+settings['duration'] = 3
+
+settings['gridcolor'] = '#555555'
+
+settings['zerolinecolor'] = '#666666'
     
 settings['external_stylesheets'] = ['./static/bWLwgP.css']
 
@@ -20,36 +24,14 @@ settings['layout'] = {
                     'color': settings['colors']['text']
                 },
                 'uirevision': None,
-                'height': 800,
-                'xaxis1': {
-                    "side": "bottom",
-                    "type": "linear",
-                    "anchor": "y1",
-                    "gridcolor": '#444444',
-                    "zerolinecolor": '#555555'
-                },
-                "yaxis1": {
-                    "side": "left",
-                    "type": "linear",
-                    "anchor": "x1",
-                    "gridcolor": '#444444',
-                    "zerolinecolor": '#555555'
-                },
-                'xaxis2': {
-                    "side": "bottom",
-                    "type": "linear",
-                    "anchor": "y2",
-                    "gridcolor": '#444444',
-                    "zerolinecolor": '#555555'
-                },
-                "yaxis2": {
-                    "side": "left",
-                    "type": "linear",
-                    "anchor": "x2",
-                    "gridcolor": '#444444',
-                    "zerolinecolor": '#555555'
-                }
+                'height': 800
             }
+
+settings['MC_Cernox'] = 'MC Plate Cernox T(K)'
+
+settings['MC_RuOx'] = 'MC Plate T(K)'
+
+settings['Magnet'] = 'Magnet T(K)'
 
 settings['lakeshore_sensors']=[
                 'PT1 Head', 
