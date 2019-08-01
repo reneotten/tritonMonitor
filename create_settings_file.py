@@ -20,7 +20,35 @@ settings['layout'] = {
                     'color': settings['colors']['text']
                 },
                 'uirevision': None,
-                'height': 800
+                'height': 800,
+                'xaxis1': {
+                    "side": "bottom",
+                    "type": "linear",
+                    "anchor": "y1",
+                    "gridcolor": '#444444',
+                    "zerolinecolor": '#555555'
+                },
+                "yaxis1": {
+                    "side": "left",
+                    "type": "linear",
+                    "anchor": "x1",
+                    "gridcolor": '#444444',
+                    "zerolinecolor": '#555555'
+                },
+                'xaxis2': {
+                    "side": "bottom",
+                    "type": "linear",
+                    "anchor": "y2",
+                    "gridcolor": '#444444',
+                    "zerolinecolor": '#555555'
+                },
+                "yaxis2": {
+                    "side": "left",
+                    "type": "linear",
+                    "anchor": "x2",
+                    "gridcolor": '#444444',
+                    "zerolinecolor": '#555555'
+                }
             }
 
 settings['lakeshore_sensors']=[
