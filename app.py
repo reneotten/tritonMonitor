@@ -54,7 +54,6 @@ def make_static_traces(df, duration=None):
             y=df.loc[df[f'{trace} t(s)']>=start_time,f'{trace} T(K)'],
             legendgroup='temperature',
             name=f'{trace} T(K)',
-            yaxis='y1'
             ) for trace in settings['lakeshore_sensors']
             ]
 
@@ -64,34 +63,34 @@ def make_static_traces(df, duration=None):
             y=df.loc[df['Time']>=start_time,f'{trace}'],
             legendgroup='pressure',
             name=f'{trace}',
-            yaxis='y2'
             ) for trace in settings['pressure_sensors']
             ]
     
-    return temp_traces + pressure_traces
+    return  temp_traces + pressure_traces, [1]*len(temp_traces) + [2]*len(pressure_traces)
     
 def make_static_figure(df, duration=None, lightweight_mode=True):
   
-    traces = make_static_traces(df, duration=duration)
+    traces, subplot = make_static_traces(df, duration=duration)
 
     fig = subplots.make_subplots(
                         rows=2, 
                         cols=1, 
                         specs=[[{}], [{}]],
-                        shared_xaxes=True, 
-                        shared_yaxes=False,
+                        shared_xaxes=True,                        
                         vertical_spacing=0.07,
                         subplot_titles=('Temperature Sensors', 'Pressure Sensors'),
                         print_grid=False
                         )
-
-    fig.add_traces(traces)
+    
+    fig.add_traces(traces, rows=subplot, cols=[1]*len(traces))
+    
 
     fig['layout'].update(**settings['layout'])
+    fig.update_layout(yaxis_type="log")
     for row in range(1,3):
         fig.update_xaxes(gridcolor=settings['gridcolor'], zerolinecolor=settings['zerolinecolor'], row=row, col=1)
         fig.update_yaxes(gridcolor=settings['gridcolor'], zerolinecolor=settings['zerolinecolor'], row=row, col=1)
-
+        
 
     return fig
 
@@ -160,7 +159,7 @@ app.layout = html.Div( # Main Div
         style={
             'textAlign': 'center',
             'color': settings['colors']['text'],
-            'padding': 25
+            'padding': 15
         }
     ) 
     ]
@@ -180,7 +179,7 @@ def update_static_figure(n_intervals):
         settings=json.load(file)
 
     fig = make_static_figure(Log.df,duration=settings['duration'])
-    fig.layout.uirevision = True
+    #fig.layout.uirevision = True
     return fig
 
 @app.callback(
