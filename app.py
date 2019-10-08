@@ -15,6 +15,10 @@ import load_triton_log
 from datetime import datetime, timedelta
 from pytz import timezone
 import json
+import socket
+
+
+
 
 
 # TODO Optimize Colors
@@ -27,7 +31,8 @@ formatter = logging.Formatter("%(levelname)s - %(message)s")
 handler.setFormatter(formatter)
 logger.addHandler(handler)
 config_file='triton200.json'
-
+host = socket.gethostbyname(socket.gethostname())
+logger.debug(host)
 with open(config_file,'r') as file:
     settings=json.load(file)
 
@@ -179,7 +184,7 @@ def update_static_figure(n_intervals):
         settings=json.load(file)
 
     fig = make_static_figure(Log.df,duration=settings['duration'])
-    #fig.layout.uirevision = True
+    fig.layout.uirevision = True
     return fig
 
 @app.callback(
@@ -238,4 +243,4 @@ def update_misc_figure(plot_traces):
 
 if __name__ == '__main__':
     logger.debug('Starting app')
-    app.run_server(debug=True)
+    app.run_server(debug=True, host=host, port = 8080)
