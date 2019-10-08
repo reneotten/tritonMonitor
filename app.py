@@ -171,7 +171,7 @@ app.layout = html.Div( # Main Div
     style={'backgroundColor': settings['colors']['background']}, 
     children=[ 
     html.H1( #Header
-        children='Triton 200', 
+        children=settings['fridge_name'], 
         style={
             'textAlign': 'center',
             'color': settings['colors']['text'],
