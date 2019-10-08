@@ -16,13 +16,24 @@ from datetime import datetime, timedelta
 from pytz import timezone
 import json
 import socket
-
-
-
+import argparse
 
 
 # TODO Optimize Colors
 # TODO Catch if sensor on top is disabled, switch between 2 MC Sensors?
+
+
+config_file='triton200.json'
+
+parser = argparse.ArgumentParser()
+parser.add_argument('--filename', default='triton200.json')
+parser.add_argument('--port', type=int, default=8080)
+
+args = parser.parse_args()
+
+config_file = args.filename
+port = args.port
+
 logger = logging.getLogger('tritonMonitor.app')
 logger.setLevel(logging.DEBUG)
 handler = logging.StreamHandler()
@@ -30,7 +41,7 @@ handler.setLevel(logging.DEBUG)
 formatter = logging.Formatter("%(levelname)s - %(message)s")
 handler.setFormatter(formatter)
 logger.addHandler(handler)
-config_file='triton200.json'
+
 host = socket.gethostbyname(socket.gethostname())
 logger.debug(host)
 with open(config_file,'r') as file:
@@ -104,7 +115,7 @@ def make_static_figure(df, duration=None, lightweight_mode=True):
 app = dash.Dash(__name__, external_stylesheets=settings['external_stylesheets'],show_undo_redo=False)
 server = app.server
 
-app.title = 'Fridge Monitor'
+app.title = settings['fridge_name'] + ' Fridge Monitor'
 
 logger.debug('Creating Layout')
 
@@ -243,4 +254,4 @@ def update_misc_figure(plot_traces):
 
 if __name__ == '__main__':
     logger.debug('Starting app')
-    app.run_server(debug=True, host=host, port = 8080)
+    app.run_server(debug=True, host=host, port = port)
