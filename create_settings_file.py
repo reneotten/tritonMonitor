@@ -11,6 +11,8 @@ settings['colors'] = {
 
 settings['duration'] = 3
 
+settings['fridge_name'] = 'Triton 200'
+
 settings['gridcolor'] = '#555555'
 
 settings['zerolinecolor'] = '#666666'
