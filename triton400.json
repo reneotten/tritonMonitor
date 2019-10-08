@@ -1,0 +1,62 @@
+{
+	"fridge_name": "Triton 400",
+    "MC_Cernox": "MC Plate Cernox T(K)",
+    "MC_RuOx": "MC Plate RuO2 T(K)",
+    "Magnet": "Magnet T(K)",
+    "colors": {
+        "background": "#333333",
+        "text": "#7FDBFF"
+    },
+    "duration": 3,
+    "external_stylesheets": [
+        "./static/bWLwgP.css"
+    ],
+    "gridcolor": "#555555",
+    "lakeshore_sensors": [
+        "PT1 Head",
+        "PT1 Plate",
+        "PT2 Head",
+        "PT2 Plate",
+        "Magnet",
+        "Still Plate",
+        "Cold Plate",
+        "MC Plate RuO2",
+        "MC Plate Cernox"
+    ],
+    "layout": {
+        "font": {
+            "color": "#7FDBFF"
+        },
+        "height": 800,
+        "paper_bgcolor": "#333333",
+        "plot_bgcolor": "#333333",
+        "uirevision": null
+    },
+    "log_file": "\\\\134.61.7.68\\Bluhm Triton 400 Log Files\\log 191002 172310.vcl",
+    "misc_sensors": [
+        "Input Water Temp",
+        "Output Water Temp",
+        "Oil Temp",
+        "Helium Temp",
+        "Motor Current",
+        "Low Pressure",
+        "Low Pressure Avg",
+        "Still heater (W)",
+        "chamber heater (W)",
+        "IVC sorb heater (W)",
+        "turbo current(A)",
+        "turbo power(W)",
+        "turbo speed(Hz)",
+        "turbo motor(C)",
+        "turbo bottom(C)"
+    ],
+    "pressure_sensors": [
+        "P1 Tank (Bar)",
+        "P2 Condense (Bar)",
+        "P3 Still (mBar)",
+        "P4 TurboBack (mBar)",
+        "P5 ForepumpBack (Bar)",
+        "Dewar (mBar)"
+    ],
+    "zerolinecolor": "#666666"
+}
