@@ -215,7 +215,7 @@ def update_mc_temp_disp(n_intervals):
 
     if val_Cernox is None:
         val_ret = val_RuOx
-    elif val_RuOx >= 100:
+    elif val_RuOx >= 70:
         val_ret = val_Cernox
     else:
         val_ret = val_RuOx
