@@ -102,7 +102,16 @@ def make_static_figure(df, duration=None, lightweight_mode=True):
     
 
     fig['layout'].update(**settings['layout'])
-    fig.update_layout(yaxis_type="log")
+    val_RuOx = Log.df[settings['MC_RuOx']].iloc[-1]
+    val_Cernox = Log.df[settings['MC_Cernox']].iloc[-1]
+
+    if val_RuOx<3 or val_Cernox<3:
+        scale = "log"
+    else:
+        scale = "linear"
+
+    fig.update_layout(yaxis_type=scale)
+
     for row in range(1,3):
         fig.update_xaxes(gridcolor=settings['gridcolor'], zerolinecolor=settings['zerolinecolor'], row=row, col=1)
         fig.update_yaxes(gridcolor=settings['gridcolor'], zerolinecolor=settings['zerolinecolor'], row=row, col=1)
