@@ -62,7 +62,7 @@ def make_static_traces(df, duration=None):
     if duration is not None:
         start_time = df['Time'].iloc[-1] - timedelta(days=duration)
     else:
-        start_time = df['Time'].iloc[-1]
+        start_time = df['Time'].iloc[0]
    
     temp_traces = [
         go.Scatter(
