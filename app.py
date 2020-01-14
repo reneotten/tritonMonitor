@@ -28,11 +28,16 @@ config_file='triton200.json'
 parser = argparse.ArgumentParser()
 parser.add_argument('--filename', default='triton200.json')
 parser.add_argument('--port', type=int, default=8080)
+parser.add_argument('--host', type=str, default='auto')
 
 args = parser.parse_args()
 
 config_file = args.filename
 port = args.port
+if args.host == 'auto':
+    host = socket.gethostname()
+else:
+    host = args.host
 
 logger = logging.getLogger('tritonMonitor.app')
 logger.setLevel(logging.DEBUG)
@@ -42,7 +47,6 @@ formatter = logging.Formatter("%(levelname)s - %(message)s")
 handler.setFormatter(formatter)
 logger.addHandler(handler)
 
-host = socket.gethostbyname(socket.gethostname())
 logger.debug(host)
 with open(config_file,'r') as file:
     settings=json.load(file)
