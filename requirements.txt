@@ -16,6 +16,7 @@ MarkupSafe==1.1.1
 numpy==1.19.4
 pandas==1.1.4
 plotly==4.13.0
+psycopg2-binary==2.8.6
 python-dateutil==2.8.1
 pytz==2020.4
 retrying==1.3.3
