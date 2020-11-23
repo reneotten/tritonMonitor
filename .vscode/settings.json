@@ -1,3 +1,4 @@
 {
-    "python.pythonPath": "C:\\Users\\otten\\AppData\\Local\\Continuum\\miniconda3\\envs\\vscode\\python.exe"
+    "python.pythonPath": "C:\\Users\\otten\\AppData\\Local\\Continuum\\miniconda3\\envs\\vscode\\python.exe",
+    "python.linting.enabled": true
 }

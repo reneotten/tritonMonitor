@@ -3,11 +3,15 @@
     "MC_Cernox": "MC Plate Cernox T(K)",
     "MC_RuOx": "MC Plate T(K)",
     "Magnet": "Magnet T(K)",
+    "SQL_DATABASE_URL": "postgres://volggrqwpectwg:94fcfad5a22f4a4cd350a6d2dcbc338de8449895b1cd67e4933323b2a107ddf2@ec2-79-125-86-58.eu-west-1.compute.amazonaws.com:5432/d33agrm8daoaqu",
+    "SQL_Table_Length": 5000,
+    "dataframe_rows": 10000,
+    "local_mode": false,
     "colors": {
         "background": "#333333",
         "text": "#7FDBFF"
     },
-    "duration": 3,
+    "duration": null,
     "external_stylesheets": [
         "./static/bWLwgP.css"
     ],
@@ -32,7 +36,7 @@
         "plot_bgcolor": "#333333",
         "uirevision": null
     },
-    "log_file": "\\\\134.61.7.160\\LogFiles\\60555 Bluhm\\log 191001 105341.vcl",
+    "log_file": "Y:\\GaAs\\Otten\\log 190522 110546.vcl",
     "misc_sensors": [
         "Input Water Temp",
         "Output Water Temp",

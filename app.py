@@ -6,14 +6,9 @@ import dash_html_components as html
 from dash.dependencies import Input, Output
 import plotly.graph_objs as go
 from plotly import subplots
-import ctypes
-import numpy as np
-import pandas as pd
-import re
 import logging
 import load_triton_log
 from datetime import datetime, timedelta
-from pytz import timezone
 import json
 import socket
 import argparse
@@ -45,9 +40,18 @@ logger.addHandler(handler)
 host = socket.gethostbyname(socket.gethostname())
 logger.debug(host)
 with open(config_file,'r') as file:
+    logger.debug(f'Loading log file {file}')
     settings=json.load(file)
 
-Log = load_triton_log.TritonLogReader(settings['log_file'])
+if settings['local_mode']:
+    Log = load_triton_log.TritonLogReader(settings['log_file'],
+                                        dataframe_rows=settings['dataframe_rows'],
+                                        sql_table_length=settings['SQL_Table_Length'])
+else:
+    Log = load_triton_log.TritonLogReader(sql=settings['SQL_DATABASE_URL'],
+                                        dataframe_rows=settings['dataframe_rows'],
+                                        sql_table_length=settings['SQL_Table_Length'])
+
 Log.logger = logger
 
 # Create main plot for the dashboard view
@@ -154,26 +158,9 @@ dashboard = [html.Div(  # Live Dashboard Part
             ),
             dcc.Graph(id='static_plot')]
 
-# Does it make sense to create 3 subplots for logviewer?
-log_reader = [html.Label('MISC Channels', 
-               style={'textAlign': 'center',
-                      'color': settings['colors']['text']}, ),
-            dcc.Dropdown(  # Log Reader Part
-            options=[
-            {'label': f'{trace}', 'value': f'{trace}'} for trace in settings['misc_sensors']           
-            ],
-            value=['turbo power(W)'],
-            multi=True,
-            style={
-                'background': settings['colors']['background'],  
-                'color': settings['colors']['text']
-                },
-            id='misc_dropdown'
-            ),
-            dcc.Graph(id='misc_plot')]
 
 
-page_fridge_1 = dashboard + log_reader
+page_fridge_1 = dashboard 
 
 
 app.layout = html.Div( # Main Div
@@ -245,21 +232,6 @@ def update_magnet_temp_disp(n_intervals):
     logger.debug('Refreshing Magnet Temp disp')
     return m_str(Log.df[settings['Magnet']].iloc[-1])
 
-@app.callback(
-    Output('misc_plot', 'figure'),
-    [Input('misc_dropdown', 'value')])
-def update_misc_figure(plot_traces):   
-    traces = [
-        go.Scatter(
-            x=Log.df['Time'],
-            y=Log.df[plot_trace],
-            name=plot_trace
-        ) for plot_trace in plot_traces
-    ]
-    return {
-        'data': traces,
-        'layout': settings['layout']        
-    }
 
 if __name__ == '__main__':
     logger.debug('Starting app')

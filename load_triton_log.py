@@ -11,7 +11,9 @@ import re
 import pandas as pd
 import logging
 from datetime import datetime
-from pytz import timezone
+import csv
+from io import StringIO
+from sqlalchemy import create_engine
 
 logger = logging.getLogger('tritonMonitor.load_triton_log')
 logger.setLevel(logging.DEBUG)
@@ -20,7 +22,6 @@ LOCAL_TIMEZONE_DIFF = datetime.now()-datetime.utcnow()
 
 def parse_cstr(cstr: bytes) -> str:
     return ctypes.create_string_buffer(cstr).value.decode()
-
 
 def split_at_idx(buf, idx):
     return buf[:idx], buf[idx:]
@@ -87,46 +88,98 @@ def cleanup_log(df, drop_columns, time_columns):
     df = df.drop(columns=['LineSize(bytes)', 'LineNumber', 'Time(secs)'])
     return df
 
+def psql_insert_copy(table, conn, keys, data_iter):
+    # gets a DBAPI connection that can provide a cursor
+    dbapi_conn = conn.connection
+    with dbapi_conn.cursor() as cur:
+        s_buf = StringIO()
+        writer = csv.writer(s_buf)
+        writer.writerows(data_iter)
+        s_buf.seek(0)
+
+        columns = ', '.join('"{}"'.format(k) for k in keys)
+        if table.schema:
+            table_name = '{}.{}'.format(table.schema, table.name)
+        else:
+            table_name = table.name
+
+        sql = 'COPY {} ({}) FROM STDIN WITH CSV'.format(
+            table_name, columns)
+        cur.copy_expert(sql=sql, file=s_buf)
         
 class TritonLogReader:
-    def __init__(self, fullpath):
+    def __init__(self, fullpath=None, sql=None, dataframe_rows=None, sql_table_length=None):
+        # If both are set, load local file and mirror to sql, if not, load from sql
         self.logger = logging.getLogger('tritonMonitor.load_triton_log.TritonLogReader')
         self.logger.setLevel(logging.DEBUG)
         self.fullpath = fullpath
+        self.sql = sql
+        self.sql_table_length = sql_table_length
+        self.dataframe_rows = dataframe_rows
         self.logger.debug(f'Opening Log File {self.fullpath}')
         self.LOCAL_TIMEZONE_DIFF = LOCAL_TIMEZONE_DIFF
-        with open(self.fullpath, 'rb') as file:           
-            self.df = parse_triton_log(file.read())
-            self.current_fpos = file.tell()
-            self.last_refresh = datetime.now() 
-        self.names = self.df.columns     
-        self.drop_columns, self.time_columns = cat_columns(self.df.columns)
+        self.last_refresh = datetime.now()
+        if self.fullpath:
+            with open(self.fullpath, 'rb') as file:           
+                self.df = parse_triton_log(file.read())
+                self.current_fpos = file.tell()
+                self.last_refresh = datetime.now() 
+                self.logger.debug(f'Dataframe with {len(self.df.index)} rows created')
+            
+            self.names = self.df.columns     
+            self.drop_columns, self.time_columns = cat_columns(self.df.columns)
 
-        self.logger.debug('Cleaning up Log file')
-        self.df = cleanup_log(self.df, self.drop_columns, self.time_columns)
+            self.logger.debug('Cleaning up Log file')
+            self.df = cleanup_log(self.df, self.drop_columns, self.time_columns)
+
+            if self.dataframe_rows:
+                 self.df =  self.df.iloc[-self.dataframe_rows:]
+
+            if self.sql:
+                self.mode = 'upstream'
+                self.engine = create_engine(self.sql)
+                self.df.iloc[-self.sql_table_length:].to_sql('triton200', self.engine, method=psql_insert_copy, if_exists='replace')
+            else:
+                self.mode = 'local'
+
+        else:
+                self.mode = 'downstream'
+                self.engine = create_engine(self.sql)
+                self.df = pd.read_sql_query('select * from "triton200"',con=self.engine)
+                self.names = self.df.columns 
+                self.drop_columns, self.time_columns = cat_columns(self.df.columns)
     
- 
-    
+
     def refresh(self):
-        self.logger.debug(f'Refresh: Opening Log File {self.fullpath}')
-        with open(self.fullpath, 'rb') as file:   
-            file.seek(self.current_fpos)             
-            bin_data = file.read()
-            self.current_fpos = file.tell()
-            self.last_refresh = datetime.now() 
-        data = np.frombuffer(bin_data, dtype=float)
-        data = data.reshape((-1, len(self.names)))
+        self.last_refresh = datetime.now()
+        if self.mode is 'upstream' or self.mode is 'local': 
+            self.logger.debug(f'Refresh: Opening Log File {self.fullpath}')
+            with open(self.fullpath, 'rb') as file:   
+                file.seek(self.current_fpos)             
+                bin_data = file.read()
+                self.current_fpos = file.tell()    
+            data = np.frombuffer(bin_data, dtype=float)
+            data = data.reshape((-1, len(self.names)))
         
         #TODO if no ew lines skip append
-        self.logger.debug(f'Found {data.shape[0]} new lines')
-        if len(data):
-            self.logger.debug(f'Creating Dataframe')
-            updated_df = pd.DataFrame(columns=self.names, data=data)
-            self.logger.debug('Refresh: Cleaning up Log file')
-            updated_df = cleanup_log(updated_df, self.drop_columns, self.time_columns)
-            self.df = self.df.append(updated_df)          
-            return updated_df.shape[0]
-        else:
-            return 0
+            self.logger.debug(f'Found {data.shape[0]} new lines')
+            if len(data):
+                self.logger.debug(f'Creating Dataframe')
+                updated_df = pd.DataFrame(columns=self.names, data=data)
+                self.logger.debug('Refresh: Cleaning up Log file')
+                updated_df = cleanup_log(updated_df, self.drop_columns, self.time_columns)
+                self.df = self.df.append(updated_df)
 
+                if self.mode is 'upstream':
+                    self.df.iloc[-1000:].to_sql('triton200', self.engine, method=psql_insert_copy, if_exists='replace')
+                    self.logger.debug(f'Updated SQL Table')
+
+                return updated_df.shape[0]
+            else:
+                return 0
+
+        else: #downstream
+            self.logger.debug(f'Updated DF fromSQL')
+            self.df = pd.read_sql_query('select * from "triton200"',con=self.engine)
+            return 0
             
