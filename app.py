@@ -235,4 +235,4 @@ def update_magnet_temp_disp(n_intervals):
 
 if __name__ == '__main__':
     logger.debug('Starting app')
-    app.run_server(debug=True, host=host, port = port)
+    app.run_server(debug=True)
