@@ -31,8 +31,9 @@ logger.addHandler(handler)
 
 host = socket.gethostbyname(socket.gethostname())
 logger.debug(host)
+
 with open(config_file,'r') as file:
-    logger.debug(f'Loading log file {file}')
+    logger.debug(f'Loading settings file {file}')
     settings=json.load(file)
 
 Log = load_triton_log.TritonLogReader(settings['log_file'],
