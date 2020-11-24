@@ -143,6 +143,9 @@ class TritonLogReader:
                  self.df =  self.df.iloc[-self.dataframe_rows:]
 
             if self.sql:
+                if self.sql =='DATABASE_URL':
+                    DATABASE_URL = os.environ['DATABASE_URL']
+                    self.logger.debug(f'Database URL is {DATABASE_URL}')
                 self.mode = 'upstream'
                 self.engine = create_engine(self.sql)
                 self.df.iloc[-self.sql_table_length:].to_sql('triton200', self.engine, method=psql_insert_copy, if_exists='replace')
