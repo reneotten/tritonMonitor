@@ -1,6 +1,6 @@
 {
     "fridge_name": "Triton 400",
-    "SQL_DATABASE_URL": "postgres://wyggoplfaafkuz:e989157cec6eb8334ab20ff7edff22fd7f4e0f66425e03c306abd224e38446f4@ec2-54-247-94-127.eu-west-1.compute.amazonaws.com:5432/d1jab0a2de7lru",
+    "SQL_DATABASE_URL": "DATABASE_URL",
     "SQL_Table_Length": 5000,
     "dataframe_rows": 10000,
     "local_mode": false,
