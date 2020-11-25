@@ -124,6 +124,7 @@ class TritonLogReader:
 
         if self.sql =='DATABASE_URL':
             DATABASE_URL = os.environ['DATABASE_URL']
+            print(DATABASE_URL)
             self.logger.debug(f'Database URL is {DATABASE_URL}')
         elif not os.path.isfile(self.fullpath):
             self.fullpath = max(glob.glob(os.path.join(self.fullpath,'*.vcl')), key=os.path.getctime)
