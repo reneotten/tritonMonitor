@@ -36,7 +36,7 @@
         "plot_bgcolor": "#333333",
         "uirevision": null
     },
-    "log_file": "\\\\133.133.133.133\\Bluhm Triton 400 Log Files\\",
+    "log_file": null,
     "misc_sensors": [
         "Input Water Temp",
         "Output Water Temp",
