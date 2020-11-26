@@ -122,8 +122,12 @@ class TritonLogReader:
         self.LOCAL_TIMEZONE_DIFF = LOCAL_TIMEZONE_DIFF
         self.last_refresh = datetime.now()
 
-        if not os.path.isfile(self.fullpath):
-            self.fullpath = max(glob.glob(os.path.join(self.fullpath,'*.vcl')), key=os.path.getctime)
+        if self.sql =='DATABASE_URL':
+            self.sql = os.environ['DATABASE_URL']
+            self.logger.debug(f'Database URL is {self.sql}')
+        elif self.fullpath:
+            if not os.path.isfile(self.fullpath):
+                self.fullpath = max(glob.glob(os.path.join(self.fullpath,'*.vcl')), key=os.path.getctime)
 
         if self.fullpath:
             with open(self.fullpath, 'rb') as file:
@@ -143,9 +147,6 @@ class TritonLogReader:
                  self.df =  self.df.iloc[-self.dataframe_rows:]
 
             if self.sql:
-                if self.sql =='DATABASE_URL':
-                    DATABASE_URL = os.environ['DATABASE_URL']
-                    self.logger.debug(f'Database URL is {DATABASE_URL}')
                 self.mode = 'upstream'
                 self.engine = create_engine(self.sql)
                 self.df.iloc[-self.sql_table_length:].to_sql('triton200', self.engine, method=psql_insert_copy, if_exists='replace')

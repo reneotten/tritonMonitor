@@ -18,8 +18,6 @@ import argparse
 # TODO Catch if sensor on top is disabled, switch between 2 MC Sensors?
 
 
-config_file='triton200.json'
-
 parser = argparse.ArgumentParser()
 parser.add_argument('--filename', default='settings.json')
 parser.add_argument('--port', type=int, default=8080)
