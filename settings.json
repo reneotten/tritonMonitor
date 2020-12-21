@@ -5,7 +5,7 @@
     "dataframe_rows": 10000,
     "local_mode": false,
     "MC_Cernox": "MC Plate Cernox T(K)",
-    "MC_RuOx": "MC Plate RuO2 T(K)",
+    "MC_RuOx": "MC Plate T(K)",
     "Magnet": "Magnet T(K)",
     "colors": {
         "background": "#333333",
