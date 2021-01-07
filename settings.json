@@ -2,7 +2,7 @@
     "fridge_name": "Triton 400",
     "SQL_DATABASE_URL": "DATABASE_URL",
     "SQL_Table_Length": 1000000,
-    "dataframe_rows": 100000,
+    "dataframe_rows": 15000,
     "local_mode": false,
     "MC_Cernox": "MC Plate Cernox T(K)",
     "MC_RuOx": "MC Plate RuO2 T(K)",
