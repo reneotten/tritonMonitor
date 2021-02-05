@@ -11,7 +11,7 @@
         "background": "#333333",
         "text": "#7FDBFF"
     },
-    "duration": null,
+    "duration": 3,
     "external_stylesheets": [
         "./static/bWLwgP.css"
     ],
