@@ -1,11 +1,11 @@
 {
-    "fridge_name": "Triton 400",
     "SQL_DATABASE_URL": "DATABASE_URL",
+    "fridge_name": "Triton 200",
     "SQL_Table_Length": 5000,
     "dataframe_rows": 10000,
     "local_mode": false,
     "MC_Cernox": "MC Plate Cernox T(K)",
-    "MC_RuOx": "MC Plate RuO2 T(K)",
+    "MC_RuOx": "MC Plate T(K)",
     "Magnet": "Magnet T(K)",
     "colors": {
         "background": "#333333",
@@ -24,7 +24,7 @@
         "Magnet",
         "Still Plate",
         "Cold Plate",
-        "MC Plate RuO2",
+        "MC Plate",
         "MC Plate Cernox"
     ],
     "layout": {
