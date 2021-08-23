@@ -201,6 +201,17 @@ def update_time_disp(n_intervals):
     return Log.df['Time'].iloc[-1]
 
 @app.callback(
+    Output('update_time','style'),
+    [Input('interval-component', 'n_intervals')]
+)
+def color_text(n_intervals):
+    if datetime.now()-Log.df['Time'].iloc[-1]>timedelta(minutes=settings['error_time_mins']):
+        ret_style = {'color':'red'}
+    else: 
+        ret_style = {'color': settings['colors']['text']} 
+    return ret_style
+
+@app.callback(
     Output('mc_temp_disp', 'children'),
     [Input('interval-component', 'n_intervals')])
 def update_mc_temp_disp(n_intervals):  
