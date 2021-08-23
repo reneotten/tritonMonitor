@@ -194,7 +194,7 @@ def update_static_figure(n_intervals):
     return fig
 
 @app.callback(
-    Output('update_time', 'children'),
+    [Output('update_time', 'children'), Output('update_time', 'style')]
     [Input('interval-component', 'n_intervals')])
 def update_time_disp(n_intervals):  
     logger.debug('Refreshing update time disp')
@@ -213,9 +213,9 @@ def update_time_disp(n_intervals):
                 'color': settings['colors']['text'],
                 'padding': 20
                 }
-    ret =  html.H2(text, style=ret_style, id='update_time')
+    
    
-    return ret
+    return [text, ret_style]
 
 @app.callback(
     Output('mc_temp_disp', 'children'),
