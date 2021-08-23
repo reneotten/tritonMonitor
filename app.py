@@ -197,7 +197,8 @@ def update_static_figure(n_intervals):
     [Input('interval-component', 'n_intervals')])
 def update_time_disp(n_intervals):  
     logger.debug('Refreshing update time disp')
-    return Log.last_refresh.strftime('%H:%M:%S     %d.%m.%Y')
+   # return Log.last_refresh.strftime('%H:%M:%S     %d.%m.%Y')
+    return Log.df['Time'].iloc[-1]
 
 @app.callback(
     Output('mc_temp_disp', 'children'),
