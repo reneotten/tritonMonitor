@@ -171,7 +171,7 @@ app.layout = html.Div( # Main Div
             'textAlign': 'center',
             'color': settings['colors']['text'],
             'padding': 15
-        }
+        }, id = 'header'
     ) 
     ]
     +   page_fridge_1 # Page Content
@@ -202,13 +202,13 @@ def update_time_disp(n_intervals):
     return text
 
 @app.callback(
-     Output('update_time', 'style'),
+     Output('header', 'style'),
     [Input('interval-component', 'n_intervals')])
 def update_time_disp(n_intervals):  
     if abs(datetime.now(pytz.timezone('Europe/Berlin'))-Log.df['Time'].iloc[-1])>timedelta(minutes=settings['error_time_mins']):
         ret_style = {'color': "#7F0000"}
     else: 
-        ret_style = {'color': settings['colors']['text']}
+        ret_style = {'color': "#7F0000"}
     return ret_style
 
 @app.callback(
