@@ -147,7 +147,8 @@ dashboard = [html.Div(  # Live Dashboard Part
             html.H2('P2', id='P2_disp'),
             html.H4('Magnet Temperature'),
             html.H2('Magnet Temp', id='magnet_temp_disp')
-                ]
+                ],
+            id='info_disp'
             ),
             dcc.Interval(
             id='interval-component',
@@ -201,13 +202,23 @@ def update_time_disp(n_intervals):
     return Log.df['Time'].iloc[-1]
 
 @app.callback(
-    Output('update_time','style'),
-    [Input('update_time', 'children')])
+    Output('info_disp','style'),
+    [Input('interval-component', 'n_intervals')])
 def color_text(n_intervals):
     if datetime.now()-Log.df['Time'].iloc[-1]>timedelta(minutes=settings['error_time_mins']):
-        ret_style = {'color':'red'}
+        ret_style = {
+                'columnCount': 4,
+                'textAlign': 'left',
+                'color': "#FF0000",
+                'padding': 20
+                }
     else: 
-        ret_style = {'color':'red'} 
+        ret_style = {
+                'columnCount': 4,
+                'textAlign': 'left',
+                'color': settings['colors']['text'],
+                'padding': 20
+                }
     return ret_style
 
 @app.callback(
