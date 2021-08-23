@@ -194,7 +194,7 @@ def update_static_figure(n_intervals):
     return fig
 
 @app.callback(
-    [Output('update_time', 'children'), Output('update_time', 'style')]
+    [Output('update_time', 'children'), Output('update_time', 'style')],
     [Input('interval-component', 'n_intervals')])
 def update_time_disp(n_intervals):  
     logger.debug('Refreshing update time disp')
