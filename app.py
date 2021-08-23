@@ -198,13 +198,14 @@ def update_static_figure(n_intervals):
     [Input('interval-component', 'n_intervals')])
 def update_time_disp(n_intervals):  
     logger.debug('Refreshing update time disp')
-    text = Log.df['Time'].iloc[-1].strftime('%H:%M:%S     %d.%m.%Y') + '\n' + Log.last_refresh.strftime('%H:%M:%S     %d.%m.%Y')
+    text = Log.df['Time'].iloc[-1].strftime('%H:%M:%S     %d.%m.%Y')
     return text
 
 @app.callback(
      Output('header', 'style'),
     [Input('interval-component', 'n_intervals')])
-def update_time_disp(n_intervals):  
+def update_time_color(n_intervals):  
+    logger.debug('Refreshing update time color')
     if abs(datetime.now(pytz.timezone('Europe/Berlin'))-Log.df['Time'].iloc[-1])>timedelta(minutes=settings['error_time_mins']):
         ret_style = {'color': "#7F0000"}
     else: 
