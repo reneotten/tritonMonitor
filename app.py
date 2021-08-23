@@ -206,19 +206,9 @@ def update_time_disp(n_intervals):
     [Input('interval-component', 'n_intervals')])
 def update_time_disp(n_intervals):  
     if abs(datetime.now(pytz.timezone('Europe/Berlin'))-Log.df['Time'].iloc[-1])>timedelta(minutes=settings['error_time_mins']):
-        ret_style = {
-                'columnCount': 4,
-                'textAlign': 'left',
-                'color': "#7F0000",
-                'padding': 20
-                }
+        ret_style = {'color': "#7F0000"}
     else: 
-        ret_style = {
-                'columnCount': 4,
-                'textAlign': 'left',
-                'color': settings['colors']['text'],
-                'padding': 20
-                }
+        ret_style = {'color': settings['colors']['text']}
     return ret_style
 
 @app.callback(
