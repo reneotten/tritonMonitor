@@ -194,11 +194,17 @@ def update_static_figure(n_intervals):
     return fig
 
 @app.callback(
-    [Output('update_time', 'children'), Output('update_time', 'style')],
+    Output('update_time', 'children'),
     [Input('interval-component', 'n_intervals')])
 def update_time_disp(n_intervals):  
     logger.debug('Refreshing update time disp')
     text = Log.df['Time'].iloc[-1].strftime('%H:%M:%S     %d.%m.%Y') + '\n' + Log.last_refresh.strftime('%H:%M:%S     %d.%m.%Y')
+    return text
+
+@app.callback(
+     Output('update_time', 'style'),
+    [Input('interval-component', 'n_intervals')])
+def update_time_disp(n_intervals):  
     if abs(datetime.now(pytz.timezone('Europe/Berlin'))-Log.df['Time'].iloc[-1])>timedelta(minutes=settings['error_time_mins']):
         ret_style = {
                 'columnCount': 4,
@@ -213,9 +219,7 @@ def update_time_disp(n_intervals):
                 'color': settings['colors']['text'],
                 'padding': 20
                 }
-    
-   
-    return [text, ret_style]
+    return ret_style
 
 @app.callback(
     Output('mc_temp_disp', 'children'),
