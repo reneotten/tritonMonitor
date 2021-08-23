@@ -199,7 +199,7 @@ def update_static_figure(n_intervals):
 def update_time_disp(n_intervals):  
     logger.debug('Refreshing update time disp')
    # return Log.last_refresh.strftime('%H:%M:%S     %d.%m.%Y')
-    return Log.df['Time'].iloc[-1]
+    return Log.df['Time'].iloc[-1].strftime('%H:%M:%S     %d.%m.%Y') + '\n' + Log.last_refresh.strftime('%H:%M:%S     %d.%m.%Y')
 
 @app.callback(
     Output('info_disp','style'),
