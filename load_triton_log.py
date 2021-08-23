@@ -16,11 +16,12 @@ from io import StringIO
 from sqlalchemy import create_engine
 import glob
 import os
+import pytz
 
 logger = logging.getLogger('tritonMonitor.load_triton_log')
 logger.setLevel(logging.DEBUG)
 
-LOCAL_TIMEZONE_DIFF = datetime.now()-datetime.utcnow()
+LOCAL_TIMEZONE_DIFF = datetime.now(pytz.timezone('Europe/Berlin'))-datetime.utcnow()
 
 def parse_cstr(cstr: bytes) -> str:
     return ctypes.create_string_buffer(cstr).value.decode()
@@ -120,7 +121,7 @@ class TritonLogReader:
         self.dataframe_rows = dataframe_rows
         self.logger.debug(f'Opening Log File {self.fullpath}')
         self.LOCAL_TIMEZONE_DIFF = LOCAL_TIMEZONE_DIFF
-        self.last_refresh = datetime.now()
+        self.last_refresh = datetime.now(pytz.timezone('Europe/Berlin'))
 
         if self.sql =='DATABASE_URL':
             self.sql = os.environ['DATABASE_URL']
@@ -134,7 +135,7 @@ class TritonLogReader:
                 self.logger.debug(f'Opening Log file {file}')
                 self.df = parse_triton_log(file.read())
                 self.current_fpos = file.tell()
-                self.last_refresh = datetime.now()
+                self.last_refresh = datetime.now(pytz.timezone('Europe/Berlin'))
                 self.logger.debug(f'Dataframe with {len(self.df.index)} rows created')
 
             self.names = self.df.columns
@@ -162,7 +163,7 @@ class TritonLogReader:
 
 
     def refresh(self):
-        self.last_refresh = datetime.now()
+        self.last_refresh = datetime.now(pytz.timezone('Europe/Berlin'))
         if self.mode == 'upstream' or self.mode == 'local':
             self.logger.debug(f'Refresh: Opening Log File {self.fullpath}')
             with open(self.fullpath, 'rb') as file:

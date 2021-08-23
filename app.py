@@ -12,6 +12,7 @@ from datetime import datetime, timedelta
 import json
 import socket
 import argparse
+import pytz
 
 
 # TODO Optimize Colors
@@ -147,8 +148,7 @@ dashboard = [html.Div(  # Live Dashboard Part
             html.H2('P2', id='P2_disp'),
             html.H4('Magnet Temperature'),
             html.H2('Magnet Temp', id='magnet_temp_disp')
-                ],
-            id='info_disp'
+                ]
             ),
             dcc.Interval(
             id='interval-component',
@@ -198,18 +198,12 @@ def update_static_figure(n_intervals):
     [Input('interval-component', 'n_intervals')])
 def update_time_disp(n_intervals):  
     logger.debug('Refreshing update time disp')
-   # return Log.last_refresh.strftime('%H:%M:%S     %d.%m.%Y')
-    return Log.df['Time'].iloc[-1].strftime('%H:%M:%S     %d.%m.%Y') + '\n' + Log.last_refresh.strftime('%H:%M:%S     %d.%m.%Y')
-
-@app.callback(
-    Output('info_disp','style'),
-    [Input('interval-component', 'n_intervals')])
-def color_text(n_intervals):
-    if abs(datetime.now()-Log.df['Time'].iloc[-1])>timedelta(minutes=settings['error_time_mins']):
+    text = Log.df['Time'].iloc[-1].strftime('%H:%M:%S     %d.%m.%Y') + '\n' + Log.last_refresh.strftime('%H:%M:%S     %d.%m.%Y')
+    if abs(datetime.now(pytz.timezone('Europe/Berlin'))-Log.df['Time'].iloc[-1])>timedelta(minutes=settings['error_time_mins']):
         ret_style = {
                 'columnCount': 4,
                 'textAlign': 'left',
-                'color': "#FF0000",
+                'color': "#7F0000",
                 'padding': 20
                 }
     else: 
@@ -219,7 +213,9 @@ def color_text(n_intervals):
                 'color': settings['colors']['text'],
                 'padding': 20
                 }
-    return ret_style
+    ret =  html.H2(text, style=ret_style, id='update_time')
+   
+    return ret
 
 @app.callback(
     Output('mc_temp_disp', 'children'),
