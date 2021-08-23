@@ -205,7 +205,7 @@ def update_time_disp(n_intervals):
     Output('info_disp','style'),
     [Input('interval-component', 'n_intervals')])
 def color_text(n_intervals):
-    if datetime.now()-Log.df['Time'].iloc[-1]>timedelta(minutes=settings['error_time_mins']):
+    if abs(datetime.now()-Log.df['Time'].iloc[-1])>timedelta(minutes=settings['error_time_mins']):
         ret_style = {
                 'columnCount': 4,
                 'textAlign': 'left',
