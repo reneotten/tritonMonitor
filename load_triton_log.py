@@ -21,7 +21,6 @@ import pytz
 logger = logging.getLogger('tritonMonitor.load_triton_log')
 logger.setLevel(logging.DEBUG)
 
-LOCAL_TIMEZONE_DIFF = datetime.now(pytz.timezone('Europe/Berlin'))-datetime.utcnow()
 
 def parse_cstr(cstr: bytes) -> str:
     return ctypes.create_string_buffer(cstr).value.decode()
@@ -78,11 +77,13 @@ def cat_columns(columns):
     return drop_columns, time_columns
 
 def cleanup_log(df, drop_columns, time_columns):
-    dt = pd.to_datetime(df['Time(secs)'], unit='s')+LOCAL_TIMEZONE_DIFF
-    df.insert(0, 'Time', dt)
+    dt = pd.to_datetime(df['Time(secs)'], unit='s')
+    df.insert(0, 'Time', dt.dt.tz_localize('UTC').dt.tz_convert('Europe/Berlin'))
 
     for column in time_columns:
-        df[column] = pd.to_datetime(df[column], unit='s')+LOCAL_TIMEZONE_DIFF
+        new_col = pd.to_datetime(df[column], unit='s', utc=True)
+        df[column] = new_col.dt.tz_convert('Europe/Berlin')
+    
         val_columns = [re.split('t\(s\)$',column)[0] + 'T(K)', re.split('t\(s\)$',column)[0] + 'R(Ohm)']
         df.loc[df[column]<='1971-01-01 00:00:00',val_columns]=None
         df.loc[df[column]<='1971-01-01 00:00:00',column]=df.loc[0,'Time']
@@ -120,7 +121,6 @@ class TritonLogReader:
         self.sql_table_length = sql_table_length
         self.dataframe_rows = dataframe_rows
         self.logger.debug(f'Opening Log File {self.fullpath}')
-        self.LOCAL_TIMEZONE_DIFF = LOCAL_TIMEZONE_DIFF
         self.last_refresh = datetime.now(pytz.timezone('Europe/Berlin'))
 
         if self.sql =='DATABASE_URL':
