@@ -108,7 +108,14 @@ def make_static_figure(df, duration=None, lightweight_mode=True):
     val_RuOx = Log.df[settings['MC_RuOx']].iloc[-1]
     val_Cernox = Log.df[settings['MC_Cernox']].iloc[-1]
 
-    if val_RuOx<3 or val_Cernox<3:
+    if val_RuOx is None and val_Cernox is not None:
+        val = val_Cernox
+    elif val_Cernox is None and val_RuOx is not None:
+        val = val_RuOx
+    else:
+        val = 300
+
+    if val<3:
         scale = "log"
     else:
         scale = "linear"

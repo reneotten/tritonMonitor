@@ -1,6 +1,6 @@
 {
-    "fridge_name": "Triton 400",
     "SQL_DATABASE_URL": "DATABASE_URL",
+    "fridge_name": "Triton 400",
     "SQL_Table_Length": 5000,
     "dataframe_rows": 10000,
     "local_mode": false,

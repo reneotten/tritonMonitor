@@ -185,7 +185,7 @@ class TritonLogReader:
                 self.df = self.df.append(updated_df)
 
                 if self.mode == 'upstream':
-                    self.df.iloc[-1000:].to_sql('triton200', self.engine, method=psql_insert_copy, if_exists='replace')
+                    self.df.iloc[-self.sql_table_length:].to_sql('triton200', self.engine, method=psql_insert_copy, if_exists='replace')
                     self.logger.debug(f'Updated SQL Table')
 
                 return updated_df.shape[0]
