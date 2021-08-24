@@ -213,10 +213,10 @@ def update_time_disp(n_intervals):
     [Input('interval-component', 'n_intervals')])
 def update_time_color(n_intervals):  
     logger.debug('Refreshing update time color')
-    if abs(datetime.now(pytz.timezone('Europe/Berlin'))-Log.df['Time'].iloc[-1])>timedelta(minutes=settings['error_time_mins']):
+    if abs(Log.last_refresh-Log.df['Time'].iloc[-1])>timedelta(minutes=settings['error_time_mins']):
         ret_style = {'color': "#FF0000"}
     else: 
-        ret_style = {'color': "#FF0000"}
+        ret_style = {'color': settings['colors']['text']}
     return ret_style
 
 @app.callback(
