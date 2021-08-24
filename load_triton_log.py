@@ -161,7 +161,7 @@ class TritonLogReader:
                 self.names = self.df.columns
                 self.drop_columns, self.time_columns = cat_columns(self.df.columns)
                 for column in ['Time'] + self.time_columns:
-                    self.df[column] = self.df[column].dt.tz_localize('UTC').dt.tz_convert('Europe/Berlin')
+                    self.df[column] = self.df[column].dt.tz_localize('Europe/Berlin')
 
 
     def refresh(self):
@@ -196,6 +196,6 @@ class TritonLogReader:
             self.logger.debug(f'Updated DF fromSQL')
             self.df = pd.read_sql_query('select * from "triton200"',con=self.engine)
             for column in ['Time'] + self.time_columns:
-                    self.df[column] = self.df[column].dt.tz_localize('UTC').dt.tz_convert('Europe/Berlin')
+                    self.df[column] = self.df[column].dt.tz_localize('Europe/Berlin')
             return 0
 
