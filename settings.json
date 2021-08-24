@@ -63,5 +63,5 @@
         "Dewar (mBar)"
     ],
     "zerolinecolor": "#666666",
-    "error_time_mins": 3
+    "error_time_mins": 10
 }
