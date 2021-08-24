@@ -62,5 +62,6 @@
         "P5 ForepumpBack (Bar)",
         "Dewar (mBar)"
     ],
-    "zerolinecolor": "#666666"
+    "zerolinecolor": "#666666",
+    "error_time_mins": 3
 }
