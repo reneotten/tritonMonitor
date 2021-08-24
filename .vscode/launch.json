@@ -12,29 +12,16 @@
             "console": "integratedTerminal"
         },
         {
-            "name": "Python: Current File T200",
+            "name": "Python: App Debug",
             "type": "python",
             "request": "launch",
-            "program": "${file}",
+            "program": "app.py",
             "console": "integratedTerminal",
             "args": [
                 "--filename",
-                "triton200.json",
+                "settings.json",
                 "--port",
                 "8080"
-            ]
-        },
-        {
-            "name": "Python: Current File T400",
-            "type": "python",
-            "request": "launch",
-            "program": "${file}",
-            "console": "integratedTerminal",
-            "args": [
-                "--filename",
-                "triton400.json",
-                "--port",
-                "8081"
             ]
         },
         {
