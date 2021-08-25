@@ -216,14 +216,12 @@ def update_time_color(n_intervals):
     if abs(Log.last_refresh-Log.df['Time'].iloc[-1])>timedelta(minutes=settings['error_time_mins']):
         ret_style = {
                     'color': "#FF0000",
-                    'textAlign': 'left',
-                    'padding': 20
+                    'padding': 0
                     }
     else: 
         ret_style = {
                     'color': settings['colors']['text'],
-                    'textAlign': 'left',
-                    'padding': 20
+                    'padding': 0
                     }
     return ret_style
 
