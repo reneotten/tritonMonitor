@@ -4,6 +4,7 @@
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
+
         {
             "name": "Python: Current File",
             "type": "python",
@@ -17,12 +18,15 @@
             "request": "launch",
             "program": "app.py",
             "console": "integratedTerminal",
+            "env": {
+                "DATABASE_URL": "postgres://bawemkplfxprup:b577f4a9e49b6103080bafbced44836b70f7a771ce66aeccc88a2c4fe9289172@ec2-52-19-96-181.eu-west-1.compute.amazonaws.com:5432/d8hm0oeeqthqp"
+            },
             "args": [
                 "--filename",
                 "settings.json",
                 "--port",
                 "8080"
-            ]
+            ]            
         },
         {
             "name": "Python: Flask",
@@ -32,7 +36,8 @@
             "env": {
                 "FLASK_APP": "app.py",
                 "FLASK_ENV": "development",
-                "FLASK_DEBUG": "1"
+                "FLASK_DEBUG": "1",
+                "DATABASE_URL": "postgres://bawemkplfxprup:b577f4a9e49b6103080bafbced44836b70f7a771ce66aeccc88a2c4fe9289172@ec2-52-19-96-181.eu-west-1.compute.amazonaws.com:5432/d8hm0oeeqthqp"
             },
             "args": [
                 "run"

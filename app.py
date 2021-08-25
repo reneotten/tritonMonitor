@@ -14,6 +14,11 @@ import socket
 import argparse
 import pytz
 
+from flask import Flask, render_template, request, jsonify
+from flask_sqlalchemy import SQLAlchemy
+from webpush_handler import trigger_push_notifications_for_subscriptions
+
+
 
 # TODO Optimize Colors
 # TODO Catch if sensor on top is disabled, switch between 2 MC Sensors?
@@ -132,9 +137,24 @@ def make_static_figure(df, duration=None, lightweight_mode=True):
 
 # Create dash app, expose flask server (change localhost to expose server?)
 app = dash.Dash(__name__, external_stylesheets=settings['external_stylesheets'],show_undo_redo=False)
+
 server = app.server
 
 app.title = settings['fridge_name'] + ' Fridge Monitor'
+
+app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite://"
+app.config.from_pyfile('application.cfg.py')
+
+db = SQLAlchemy(app)
+
+
+class PushSubscription(db.Model):
+    id = db.Column(db.Integer, primary_key=True, unique=True)
+    subscription_json = db.Column(db.Text, nullable=False)
+
+
+db.create_all()
+
 
 logger.debug('Creating Layout')
 
@@ -187,6 +207,39 @@ app.layout = html.Div( # Main Div
     +   page_fridge_1 # Page Content
     )
     
+
+@app.route("/api/push-subscriptions", methods=["POST"])
+def create_push_subscription():
+    json_data = request.get_json()
+    subscription = PushSubscription.query.filter_by(
+        subscription_json=json_data['subscription_json']
+    ).first()
+    if subscription is None:
+        subscription = PushSubscription(
+            subscription_json=json_data['subscription_json']
+        )
+        db.session.add(subscription)
+        db.session.commit()
+    return jsonify({
+        "status": "success"
+    })
+
+@app.route("/api/push-subscriptions", methods=["POST"])
+def create_push_subscription():
+    json_data = request.get_json()
+    subscription = PushSubscription.query.filter_by(
+        subscription_json=json_data['subscription_json']
+    ).first()
+    if subscription is None:
+        subscription = PushSubscription(
+            subscription_json=json_data['subscription_json']
+        )
+        db.session.add(subscription)
+        db.session.commit()
+    return jsonify({
+        "status": "success"
+    })
+
 # create callbacks
 logger.debug('Creating callbacks')
 @app.callback(
