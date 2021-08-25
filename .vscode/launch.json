@@ -19,7 +19,10 @@
             "program": "app.py",
             "console": "integratedTerminal",
             "env": {
-                "DATABASE_URL": "postgres://bawemkplfxprup:b577f4a9e49b6103080bafbced44836b70f7a771ce66aeccc88a2c4fe9289172@ec2-52-19-96-181.eu-west-1.compute.amazonaws.com:5432/d8hm0oeeqthqp"
+                "DATABASE_URL": "postgresql://bawemkplfxprup:b577f4a9e49b6103080bafbced44836b70f7a771ce66aeccc88a2c4fe9289172@ec2-52-19-96-181.eu-west-1.compute.amazonaws.com:5432/d8hm0oeeqthqp",
+                "VAPID_PUBLIC_KEY" : "BOOUV6Alv3Ugr_Lw1337xf1MDDCPIF_NtB5JKt8udz4tntNkb5Xtd5kILVvyVC5U5jU0nJbMS7CzgpWg2nn6tVI",
+                "VAPID_PRIVATE_KEY" : "6vQgqF0vRNZ4NEHYE2hbjniLOAFtP5ys27u7giURLWE",
+                "VAPID_CLAIM_EMAIL" : "rene.otten@rwth-aachen.de"
             },
             "args": [
                 "--filename",
@@ -37,7 +40,7 @@
                 "FLASK_APP": "app.py",
                 "FLASK_ENV": "development",
                 "FLASK_DEBUG": "1",
-                "DATABASE_URL": "postgres://bawemkplfxprup:b577f4a9e49b6103080bafbced44836b70f7a771ce66aeccc88a2c4fe9289172@ec2-52-19-96-181.eu-west-1.compute.amazonaws.com:5432/d8hm0oeeqthqp"
+                "DATABASE_URL": "postgresql://bawemkplfxprup:b577f4a9e49b6103080bafbced44836b70f7a771ce66aeccc88a2c4fe9289172@ec2-52-19-96-181.eu-west-1.compute.amazonaws.com:5432/d8hm0oeeqthqp"
             },
             "args": [
                 "run"

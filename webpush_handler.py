@@ -1,6 +1,6 @@
 from pywebpush import webpush, WebPushException
 import json
-from flask import current_app
+import os
 
 
 def trigger_push_notification(push_subscription, title, body):
@@ -8,10 +8,10 @@ def trigger_push_notification(push_subscription, title, body):
         response = webpush(
             subscription_info=json.loads(push_subscription.subscription_json),
             data=json.dumps({"title": title, "body": body}),
-            vapid_private_key=current_app.config["VAPID_PRIVATE_KEY"],
+            vapid_private_key=os.environ["VAPID_PRIVATE_KEY"],
             vapid_claims={
                 "sub": "mailto:{}".format(
-                    current_app.config["VAPID_CLAIM_EMAIL"])
+                    os.environ["VAPID_CLAIM_EMAIL"])
             }
         )
         return response.ok

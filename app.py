@@ -12,7 +12,7 @@ from datetime import datetime, timedelta
 import json
 import socket
 import argparse
-import pytz
+import os
 
 from flask import Flask, render_template, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
@@ -142,10 +142,10 @@ server = app.server
 
 app.title = settings['fridge_name'] + ' Fridge Monitor'
 
-app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite://"
-app.config.from_pyfile('application.cfg.py')
+server.config['SQLALCHEMY_DATABASE_URI'] = "sqlite://"
+server.config['VAPID_PUBLIC_KEY'] = os.environ['VAPID_PUBLIC_KEY']
 
-db = SQLAlchemy(app)
+db = SQLAlchemy(server)
 
 
 class PushSubscription(db.Model):
@@ -185,7 +185,8 @@ dashboard = [html.Div(  # Live Dashboard Part
             interval=60*1000, # in milliseconds
             n_intervals=0
             ),
-            dcc.Graph(id='static_plot')]
+            dcc.Graph(id='static_plot'),
+            html.Div(id='hidden-div', style={'display':'none'})]
 
 
 
@@ -208,7 +209,7 @@ app.layout = html.Div( # Main Div
     )
     
 
-@app.route("/api/push-subscriptions", methods=["POST"])
+@server.route("/api/push-subscriptions", methods=["POST"])
 def create_push_subscription():
     json_data = request.get_json()
     subscription = PushSubscription.query.filter_by(
@@ -224,20 +225,18 @@ def create_push_subscription():
         "status": "success"
     })
 
-@app.route("/api/push-subscriptions", methods=["POST"])
-def create_push_subscription():
+@server.route("/admin-api/trigger-push-notifications", methods=["POST"])
+def trigger_push_notifications():
     json_data = request.get_json()
-    subscription = PushSubscription.query.filter_by(
-        subscription_json=json_data['subscription_json']
-    ).first()
-    if subscription is None:
-        subscription = PushSubscription(
-            subscription_json=json_data['subscription_json']
-        )
-        db.session.add(subscription)
-        db.session.commit()
+    subscriptions = PushSubscription.query.all()
+    results = trigger_push_notifications_for_subscriptions(
+        subscriptions,
+        json_data.get('title'),
+        json_data.get('body')
+    )
     return jsonify({
-        "status": "success"
+        "status": "success",
+        "result": results
     })
 
 # create callbacks
@@ -263,6 +262,18 @@ def update_time_disp(n_intervals):
     logger.debug('Refreshing update time disp')
     text = Log.df['Time'].iloc[-1].strftime('%H:%M:%S     %d.%m.%Y')
     return text
+
+@app.callback(
+    Output('hidden-div', 'style'),
+    [Input('interval-component', 'n_intervals')])
+def trigger_push_notifications_cb(n_intervals):
+    subscriptions = PushSubscription.query.all()
+    results = trigger_push_notifications_for_subscriptions(
+        subscriptions,
+       'Tilte',
+        n_intervals
+    )
+    return {'display':'none'}
 
 @app.callback(
      Output('update_time', 'style'),
