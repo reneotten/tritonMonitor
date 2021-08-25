@@ -14,7 +14,7 @@ import socket
 import argparse
 import os
 
-from flask import Flask, render_template, request, jsonify
+from flask import request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from webpush_handler import trigger_push_notifications_for_subscriptions
 
