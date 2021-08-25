@@ -146,15 +146,18 @@ dashboard = [html.Div(  # Live Dashboard Part
                 'color': settings['colors']['text'],
                 'padding': 20
                 },
-        children=[
-            html.H4('Last Log Read', id='log header'),
-            html.H2('Last Log Read', id='update_time'),
-            html.H4('MC Temperature'),
-            html.H2('MC Temp', id='mc_temp_disp'),
-            html.H4('P2 Condenser'),
-            html.H2('P2', id='P2_disp'),
-            html.H4('Magnet Temperature'),
-            html.H2('Magnet Temp', id='magnet_temp_disp')
+        children=[  html.Div([
+                        html.H4('Last Log Read', id='log header'),
+                        html.H2('Last Log Read', id='update_time'),]),
+                    html.Div([
+                        html.H4('MC Temperature'),
+                        html.H2('MC Temp', id='mc_temp_disp'),]),
+                    html.Div([
+                        html.H4('P2 Condenser'),
+                        html.H2('P2', id='P2_disp'),]),
+                    html.Div([
+                        html.H4('Magnet Temperature'),
+                        html.H2('Magnet Temp', id='magnet_temp_disp')]),
                 ]
             ),
             dcc.Interval(
